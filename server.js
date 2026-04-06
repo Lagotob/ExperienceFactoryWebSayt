@@ -15,7 +15,7 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '3mb' }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 const connectionString = process.env.DATABASE_URL;
@@ -36,6 +36,13 @@ if (!pool) {
     console.warn('[EXP] DATABASE_URL o\'rnatilmagan — DB talab qiladigan /api/* 503 qaytaradi (tasks API uchun statik ro\'yxat beriladi).');
 }
 
+function omitPassword(row) {
+    if (!row || typeof row !== 'object') return row;
+    const u = { ...row };
+    delete u.password;
+    return u;
+}
+
 async function ensureUserSchema() {
     if (!pool) return;
     try {
@@ -43,8 +50,10 @@ async function ensureUserSchema() {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ DEFAULT NOW();
         `);
         await pool.query(`UPDATE users SET last_seen_at = NOW() WHERE last_seen_at IS NULL`);
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT ''`);
+        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_data TEXT DEFAULT ''`);
     } catch (err) {
-        console.error('[EXP] users.last_seen_at migration:', err.message);
+        console.error('[EXP] users schema migration:', err.message);
     }
 }
 
@@ -84,7 +93,7 @@ app.get('/api/users', async (req, res) => {
     if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan' });
     try {
         const result = await pool.query('SELECT * FROM users ORDER BY xp DESC');
-        res.json({ success: true, users: result.rows });
+        res.json({ success: true, users: result.rows.map(omitPassword) });
     } catch (err) {
         console.error(err);
         res.status(500).json({ success: false, error: err.message });
@@ -95,9 +104,12 @@ app.get('/api/users', async (req, res) => {
 app.get('/api/users/:id', async (req, res) => {
     if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan' });
     try {
-        const result = await pool.query('SELECT * FROM users WHERE user_id = $1 OR username = $1', [req.params.id]);
+        const result = await pool.query(
+            'SELECT * FROM users WHERE user_id::text = $1 OR username = $1',
+            [req.params.id]
+        );
         if (result.rows.length > 0) {
-            res.json({ success: true, user: result.rows[0] });
+            res.json({ success: true, user: omitPassword(result.rows[0]) });
         } else {
             res.status(404).json({ success: false, error: "User not found" });
         }
@@ -121,18 +133,37 @@ app.post('/api/users', async (req, res) => {
     }
 });
 
-// Foydalanuvchini yangilash
+// Foydalanuvchini yangilash (barcha qurilmalar uchun PostgreSQL — manba)
 app.put('/api/users/:id', async (req, res) => {
     if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan' });
-    const { xp, coins, completed_tasks, warnings_count, level } = req.body;
     try {
-        const result = await pool.query(
-            'UPDATE users SET xp = $1, coins = $2, completed_tasks = $3, warnings_count = $4, level = $5 WHERE user_id = $6 RETURNING *',
-            [xp, coins, completed_tasks, warnings_count, level, req.params.id]
+        const found = await pool.query(
+            'SELECT * FROM users WHERE user_id::text = $1 OR username = $1',
+            [req.params.id]
         );
-        if (!result.rows.length) {
+        if (!found.rows.length) {
             return res.status(404).json({ success: false, error: 'User not found' });
         }
+        const cur = found.rows[0];
+        const b = req.body || {};
+        const xp = b.xp !== undefined ? b.xp : cur.xp;
+        const coins = b.coins !== undefined ? b.coins : cur.coins;
+        const completed_tasks = b.completed_tasks !== undefined ? b.completed_tasks : cur.completed_tasks;
+        const warnings_count = b.warnings_count !== undefined ? b.warnings_count : cur.warnings_count;
+        const level = b.level !== undefined ? b.level : cur.level;
+        const full_name = b.full_name !== undefined ? b.full_name : cur.full_name;
+        const bio = b.bio !== undefined ? b.bio : (cur.bio != null ? cur.bio : '');
+        const avatar_data = b.avatar_data !== undefined ? b.avatar_data : (cur.avatar_data != null ? cur.avatar_data : '');
+        let password = cur.password;
+        if (b.password !== undefined && String(b.password).length > 0) {
+            password = b.password;
+        }
+        const result = await pool.query(
+            `UPDATE users SET xp = $1, coins = $2, completed_tasks = $3, warnings_count = $4, level = $5,
+             full_name = $6, bio = $7, avatar_data = $8, password = $9
+             WHERE user_id = $10 RETURNING *`,
+            [xp, coins, completed_tasks, warnings_count, level, full_name, bio, avatar_data, password, cur.user_id]
+        );
         res.json({ success: true, user: result.rows[0] });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -258,7 +289,7 @@ app.get('/api/leaderboard', async (req, res) => {
     if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan', users: [] });
     try {
         const result = await pool.query('SELECT * FROM users ORDER BY xp DESC LIMIT 100');
-        res.json({ success: true, users: result.rows });
+        res.json({ success: true, users: result.rows.map(omitPassword) });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
     }

@@ -515,6 +515,30 @@
             persistClientUser();
         }
 
+        /** Boshqa telefon/kompyuterdan kirganda profil serverdan (PostgreSQL) yuklanadi */
+        async function refreshUserFromServer() {
+            if (!currentUser) return;
+            const uid = currentUser.user_id != null ? currentUser.user_id : currentUser.id;
+            if (uid == null) return;
+            try {
+                const health = await fetch('/api/health');
+                const h = await health.json();
+                if (!h.database) return;
+                const r = await fetch('/api/users/' + encodeURIComponent(uid));
+                const data = await r.json();
+                if (!r.ok || !data.success || !data.user) return;
+                const localPw = currentUser.password;
+                currentUser = data.user;
+                if (localPw != null) currentUser.password = localPw;
+                if (currentUser.user_id != null && currentUser.id == null) currentUser.id = currentUser.user_id;
+                if (currentUser.bio === undefined) currentUser.bio = '';
+                if (currentUser.avatar_data === undefined) currentUser.avatar_data = '';
+                persistClientUser();
+            } catch (e) {
+                console.warn('refreshUserFromServer', e);
+            }
+        }
+
         setInterval(() => {
             sessionSeconds++;
             if (sessionSeconds % 10 === 0) {
@@ -710,10 +734,37 @@
             ev.target.value = '';
         }
 
-        function clearProfileAvatarCl() {
+        async function clearProfileAvatarCl() {
             if (!confirm("Rasmni olib tashlaysizmi?")) return;
             pendingAvatar = null;
             currentUser.avatar_data = '';
+            const uid = currentUser.user_id != null ? currentUser.user_id : currentUser.id;
+            try {
+                const hr = await fetch('/api/health');
+                const hj = await hr.json();
+                if (hj.database && uid != null) {
+                    const keepPw = currentUser.password;
+                    const res = await fetch('/api/users/' + encodeURIComponent(uid), {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            xp: currentUser.xp != null ? currentUser.xp : 0,
+                            coins: currentUser.coins != null ? currentUser.coins : 0,
+                            completed_tasks: currentUser.completed_tasks != null ? currentUser.completed_tasks : 0,
+                            warnings_count: currentUser.warnings_count != null ? currentUser.warnings_count : 0,
+                            level: currentUser.level != null ? currentUser.level : 1,
+                            full_name: currentUser.full_name || '',
+                            bio: currentUser.bio || '',
+                            avatar_data: ''
+                        })
+                    });
+                    const data = await res.json();
+                    if (res.ok && data.success && data.user) {
+                        currentUser = data.user;
+                        if (keepPw != null) currentUser.password = keepPw;
+                    }
+                }
+            } catch (e) { /* offline */ }
             persistClientUser();
             renderProfile();
         }
@@ -766,7 +817,7 @@
             }
         }
 
-        function saveProfileSettingsCl() {
+        async function saveProfileSettingsCl() {
             const fullName = document.getElementById('edit-full-name').value.trim();
             const bio = document.getElementById('edit-bio').value;
             const oldPass = document.getElementById('edit-old-password').value;
@@ -778,20 +829,63 @@
                 if (oldPass !== currentUser.password) { alert("Joriy parol noto'g'ri."); return; }
                 if (newPass.length < 4) { alert("Yangi parol kamida 4 belgi."); return; }
                 if (newPass !== newPass2) { alert("Parollar mos emas."); return; }
-                currentUser.password = newPass;
             }
-            currentUser.full_name = fullName;
-            currentUser.bio = bio;
-            if (pendingAvatar !== null) {
-                currentUser.avatar_data = pendingAvatar;
-                pendingAvatar = null;
+            const uid = currentUser.user_id != null ? currentUser.user_id : currentUser.id;
+            let avatarVal = currentUser.avatar_data || '';
+            if (pendingAvatar !== null) avatarVal = pendingAvatar;
+
+            const payload = {
+                xp: currentUser.xp != null ? currentUser.xp : 0,
+                coins: currentUser.coins != null ? currentUser.coins : 0,
+                completed_tasks: currentUser.completed_tasks != null ? currentUser.completed_tasks : 0,
+                warnings_count: currentUser.warnings_count != null ? currentUser.warnings_count : 0,
+                level: currentUser.level != null ? currentUser.level : 1,
+                full_name: fullName,
+                bio: bio,
+                avatar_data: avatarVal
+            };
+            if (newPass) payload.password = newPass;
+
+            try {
+                const response = await fetch('/api/users/' + encodeURIComponent(uid), {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                let data = {};
+                try { data = await response.json(); } catch (_) {}
+                if (response.ok && data.success && data.user) {
+                    currentUser = data.user;
+                    pendingAvatar = null;
+                    persistClientUser();
+                    document.getElementById('edit-old-password').value = '';
+                    document.getElementById('edit-new-password').value = '';
+                    document.getElementById('edit-new-password2').value = '';
+                    alert("✅ Profil serverda saqlandi (barcha qurilmalar).");
+                    renderProfile();
+                    updateSidebar();
+                    return;
+                }
+                if (response.status === 503) {
+                    currentUser.full_name = fullName;
+                    currentUser.bio = bio;
+                    if (pendingAvatar !== null) {
+                        currentUser.avatar_data = pendingAvatar;
+                        pendingAvatar = null;
+                    }
+                    if (newPass) currentUser.password = newPass;
+                    persistClientUser();
+                    document.getElementById('edit-old-password').value = '';
+                    document.getElementById('edit-new-password').value = '';
+                    document.getElementById('edit-new-password2').value = '';
+                    alert("⚠️ Server/PostgreSQL yo'q — faqat bu qurilmada saqlandi.");
+                    renderProfile();
+                    return;
+                }
+                alert(data.error || "Profil saqlanmadi.");
+            } catch (e) {
+                alert("Ulanish xatosi. Keyinroq urinib ko'ring.");
             }
-            persistClientUser();
-            document.getElementById('edit-old-password').value = '';
-            document.getElementById('edit-new-password').value = '';
-            document.getElementById('edit-new-password2').value = '';
-            alert("✅ Profil saqlandi.");
-            renderProfile();
         }
 
         // Profile page
@@ -1125,9 +1219,10 @@
             });
         });
 
-        // Initial load
+        // Initial load — avvalo serverdan foydalanuvchini yuklash (boshqa qurilmadagi ma'lumot)
         window.onload = async () => {
             await loadTasks();
+            await refreshUserFromServer();
             try {
                 const h = await fetch('/api/health');
                 const j = await h.json();
