@@ -43,18 +43,78 @@ function omitPassword(row) {
     return u;
 }
 
+/** Telegram-bot va veb-sayt bitta Neon jadvalidan foydalanadi (bir xil DATABASE_URL). */
 async function ensureUserSchema() {
     if (!pool) return;
-    try {
-        await pool.query(`
-            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ DEFAULT NOW();
-        `);
-        await pool.query(`UPDATE users SET last_seen_at = NOW() WHERE last_seen_at IS NULL`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT ''`);
-        await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_data TEXT DEFAULT ''`);
-    } catch (err) {
-        console.error('[EXP] users schema migration:', err.message);
-    }
+    const q = async (sql, tag) => {
+        try {
+            await pool.query(sql);
+        } catch (err) {
+            console.warn('[EXP] migration', tag + ':', err.message);
+        }
+    };
+    await q(
+        `CREATE SEQUENCE IF NOT EXISTS web_user_id_seq AS BIGINT INCREMENT BY 1 MINVALUE 1000000000000 START 1000000000000`,
+        'web_user_id_seq'
+    );
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(600) DEFAULT ''`, 'full_name');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS password VARCHAR(600)`, 'password');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS region VARCHAR(255) DEFAULT ''`, 'region');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS school VARCHAR(255) DEFAULT ''`, 'school');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS first_name VARCHAR(100) DEFAULT ''`, 'first_name');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_name VARCHAR(100) DEFAULT ''`, 'last_name');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ DEFAULT NOW()`, 'last_seen_at');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS bio TEXT DEFAULT ''`, 'bio');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_data TEXT DEFAULT ''`, 'avatar_data');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS completed_tasks INTEGER DEFAULT 0`, 'completed_tasks');
+    await q(`ALTER TABLE users ADD COLUMN IF NOT EXISTS warnings_count INTEGER DEFAULT 0`, 'warnings_count');
+    await q(
+        `DO $migrate$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'total_quests')
+               AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'completed_tasks') THEN
+                ALTER TABLE users RENAME COLUMN total_quests TO completed_tasks;
+            END IF;
+            IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'warnings')
+               AND NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'warnings_count') THEN
+                ALTER TABLE users RENAME COLUMN warnings TO warnings_count;
+            END IF;
+        END
+        $migrate$`,
+        'rename_bot_columns'
+    );
+    await q(
+        `UPDATE users SET completed_tasks = COALESCE(completed_tasks, 0) WHERE completed_tasks IS NULL`,
+        'fill_completed_tasks'
+    );
+    await q(
+        `UPDATE users SET warnings_count = COALESCE(warnings_count, 0) WHERE warnings_count IS NULL`,
+        'fill_warnings'
+    );
+    await q(`UPDATE users SET last_seen_at = NOW() WHERE last_seen_at IS NULL`, 'last_seen');
+    await q(
+        `SELECT setval(
+            'web_user_id_seq',
+            GREATEST(
+                1000000000000::bigint,
+                (SELECT COALESCE(MAX(user_id), 1000000000000 - 1) FROM users WHERE user_id >= 1000000000000)
+            ),
+            true
+        )`,
+        'setval_web_user_id_seq'
+    );
+    await q(
+        `ALTER TABLE daily_quests ALTER COLUMN user_id TYPE BIGINT USING user_id::bigint`,
+        'daily_quests_user_id_bigint'
+    );
+    await q(
+        `ALTER TABLE quest_submissions ALTER COLUMN user_id TYPE BIGINT USING user_id::bigint`,
+        'quest_submissions_user_id_bigint'
+    );
+    await q(
+        `ALTER TABLE users ALTER COLUMN user_id TYPE BIGINT USING user_id::bigint`,
+        'users_user_id_bigint'
+    );
 }
 
 function scheduleInactiveAccountPurge() {
@@ -63,7 +123,9 @@ function scheduleInactiveAccountPurge() {
         try {
             const r = await pool.query(`
                 DELETE FROM users
-                WHERE last_seen_at IS NOT NULL
+                WHERE user_id >= 1000000000000
+                  AND password IS NOT NULL
+                  AND last_seen_at IS NOT NULL
                   AND last_seen_at < NOW() - INTERVAL '1 year'
             `);
             if (r.rowCount > 0) {
@@ -118,14 +180,22 @@ app.get('/api/users/:id', async (req, res) => {
     }
 });
 
-// Yangi foydalanuvchi qo'shish
+// Yangi foydalanuvchi qo'shish (veb: user_id >= 10^12 — Telegram ID bilan aralashmaydi)
 app.post('/api/users', async (req, res) => {
     if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan' });
     const { username, full_name, password, region, school } = req.body;
     try {
+        const seq = await pool.query('SELECT nextval(\'web_user_id_seq\') AS wid');
+        const webId = seq.rows[0].wid;
+        const fn = (full_name || '').trim() || username;
         const result = await pool.query(
-            'INSERT INTO users (username, full_name, password, region, school, xp, coins, level, completed_tasks, warnings_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
-            [username, full_name, password, region, school, 0, 0, 1, 0, 0]
+            `INSERT INTO users (
+                user_id, username, full_name, password, region, school,
+                first_name, last_name,
+                xp, coins, level, completed_tasks, warnings_count
+            ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+            RETURNING *`,
+            [webId, username, full_name, password, region, school, fn, '', 0, 0, 1, 0, 0]
         );
         res.json({ success: true, user: result.rows[0] });
     } catch (err) {
@@ -235,7 +305,7 @@ app.delete('/api/users/:id', async (req, res) => {
         }
         const userId = found.rows[0].user_id;
         try {
-            await pool.query('DELETE FROM quest_submissions WHERE worker_id::text = $1', [String(userId)]);
+            await pool.query('DELETE FROM quest_submissions WHERE user_id::text = $1', [String(userId)]);
         } catch (subErr) {
             if (subErr.code !== '42P01') {
                 console.warn('[EXP] quest_submissions delete:', subErr.message);
@@ -273,7 +343,7 @@ app.post('/api/submissions', async (req, res) => {
     const { worker_id, task_id, task_title, solution_link } = req.body;
     try {
         const result = await pool.query(
-            'INSERT INTO quest_submissions (worker_id, quest_name, proof_type, proof_content, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+            'INSERT INTO quest_submissions (user_id, quest_name, proof_type, proof_content, status) VALUES ($1, $2, $3, $4, $5) RETURNING *',
             [worker_id, task_title, 'link', solution_link, 'pending']
         );
         res.json({ success: true, submission: result.rows[0] });
