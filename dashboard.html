@@ -814,6 +814,26 @@
             alert("✅ Profil saqlandi.");
             renderProfile();
         }
+
+        function deleteAccountLocal() {
+            const pwdEl = document.getElementById('delete-account-password');
+            const pwd = pwdEl ? pwdEl.value : '';
+            if (!pwd) {
+                alert("Parolni kiriting.");
+                return;
+            }
+            if (pwd !== currentUser.password) {
+                alert("Joriy parol noto'g'ri.");
+                return;
+            }
+            if (!confirm("Hisobingiz bu qurilmadagi ro'yxatdan o'chiriladi. Davom etasizmi?")) return;
+            users = users.filter(u => u.id !== currentUser.id);
+            saveUsers();
+            localStorage.removeItem('exp_current_user');
+            currentUser = null;
+            alert("Hisob o'chirildi.");
+            window.location.href = 'index.html';
+        }
         
         // Update user in array
         function updateUserInArray(updatedUser) {
@@ -1175,6 +1195,16 @@
                         <input type="password" id="edit-new-password2" autocomplete="new-password" placeholder="Takrorlang">
 
                         <button type="button" class="btn-profile-save" onclick="saveProfileSettings()"><i class="fas fa-save"></i> SAQLASH</button>
+                    </div>
+                </div>
+
+                <div class="profile-edit-card" style="border-color: rgba(255,68,68,0.4);">
+                    <h3 style="color: #ff6666;"><i class="fas fa-skull-crossbones"></i> Xavfli zona</h3>
+                    <p class="hint" style="margin-bottom: 1rem;">Hisobni bu brauzerdagi demo-ro'yxatdan o'chirish. Serverdagi akkaunt uchun <code>client.html</code> orqali o'chiring.</p>
+                    <div class="profile-form">
+                        <label for="delete-account-password">Tasdiqlash — joriy parol</label>
+                        <input type="password" id="delete-account-password" autocomplete="off" placeholder="Parol">
+                        <button type="button" class="btn-profile-save" style="background: rgba(255,68,68,0.2); border: 1px solid #ff4444; color: #ff8888;" onclick="deleteAccountLocal()"><i class="fas fa-user-slash"></i> HISOBNI O'CHIRISH</button>
                     </div>
                 </div>
             `;

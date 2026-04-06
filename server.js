@@ -21,6 +21,38 @@ if (!pool) {
     console.warn('[EXP] DATABASE_URL o\'rnatilmagan — DB talab qiladigan /api/* 503 qaytaradi (tasks API uchun statik ro\'yxat beriladi).');
 }
 
+async function ensureUserSchema() {
+    if (!pool) return;
+    try {
+        await pool.query(`
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS last_seen_at TIMESTAMPTZ DEFAULT NOW();
+        `);
+        await pool.query(`UPDATE users SET last_seen_at = NOW() WHERE last_seen_at IS NULL`);
+    } catch (err) {
+        console.error('[EXP] users.last_seen_at migration:', err.message);
+    }
+}
+
+function scheduleInactiveAccountPurge() {
+    const run = async () => {
+        if (!pool) return;
+        try {
+            const r = await pool.query(`
+                DELETE FROM users
+                WHERE last_seen_at IS NOT NULL
+                  AND last_seen_at < NOW() - INTERVAL '1 year'
+            `);
+            if (r.rowCount > 0) {
+                console.log('[EXP] 1 yildan ortiq kirilmagan akkauntlar olib tashlandi:', r.rowCount);
+            }
+        } catch (err) {
+            console.error('[EXP] inactive purge:', err.message);
+        }
+    };
+    setTimeout(run, 60 * 1000);
+    setInterval(run, 24 * 60 * 60 * 1000);
+}
+
 const DEFAULT_TASKS_FALLBACK = [
     { id: 1, title: "Algoritmlar Asosi", description: "C++ tilida 5 ta saralash algoritmini yozing.", difficulty: "oson", reward_xp: 250, tech_stack: "C++" },
     { id: 2, title: "Baza Bilan Ishlash", description: "PostgreSQL da murakkab JOIN so'rovlarini bajaring.", difficulty: "orta", reward_xp: 400, tech_stack: "SQL" },
@@ -102,11 +134,71 @@ app.post('/api/login', async (req, res) => {
             [username, password]
         );
         if (result.rows.length > 0) {
-            res.json({ success: true, user: result.rows[0] });
+            const user = result.rows[0];
+            await pool.query('UPDATE users SET last_seen_at = NOW() WHERE user_id = $1', [user.user_id]);
+            res.json({ success: true, user });
         } else {
             res.status(401).json({ success: false, error: "Invalid credentials" });
         }
     } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Oxirgi faollik (1 yil qoidasi uchun). Brauzer sessiyasida chaqiriladi.
+app.post('/api/ping', async (req, res) => {
+    if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan' });
+    const { username, password } = req.body || {};
+    if (!username || !password) {
+        return res.status(400).json({ success: false, error: 'username va password kerak' });
+    }
+    try {
+        const r = await pool.query(
+            `UPDATE users SET last_seen_at = NOW()
+             WHERE username = $1 AND password = $2
+             RETURNING user_id`,
+            [username, password]
+        );
+        if (r.rowCount === 0) {
+            return res.status(401).json({ success: false, error: 'Not authorized' });
+        }
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Hisobni o'chirish (parol tasdiqlangan bo'lsa)
+app.delete('/api/users/:id', async (req, res) => {
+    if (!pool) return res.status(503).json({ success: false, error: 'DATABASE_URL sozlanmagan' });
+    const { password } = req.body || {};
+    if (!password) {
+        return res.status(400).json({ success: false, error: 'password kerak' });
+    }
+    const idParam = req.params.id;
+    try {
+        const found = await pool.query(
+            'SELECT user_id, password FROM users WHERE user_id::text = $1 OR username = $1',
+            [idParam]
+        );
+        if (found.rows.length === 0) {
+            return res.status(404).json({ success: false, error: 'User not found' });
+        }
+        if (found.rows[0].password !== password) {
+            return res.status(401).json({ success: false, error: 'Invalid password' });
+        }
+        const userId = found.rows[0].user_id;
+        try {
+            await pool.query('DELETE FROM quest_submissions WHERE worker_id::text = $1', [String(userId)]);
+        } catch (subErr) {
+            if (subErr.code !== '42P01') {
+                console.warn('[EXP] quest_submissions delete:', subErr.message);
+            }
+        }
+        await pool.query('DELETE FROM users WHERE user_id = $1', [userId]);
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
         res.status(500).json({ success: false, error: err.message });
     }
 });
@@ -166,6 +258,13 @@ app.use((req, res, next) => {
     rootStatic(req, res, next);
 });
 
-app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
-});
+ensureUserSchema()
+    .then(() => {
+        scheduleInactiveAccountPurge();
+    })
+    .catch(() => {})
+    .finally(() => {
+        app.listen(port, () => {
+            console.log(`Server running at http://localhost:${port}`);
+        });
+    });

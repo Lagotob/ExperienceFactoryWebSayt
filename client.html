@@ -704,6 +704,53 @@
             renderProfile();
         }
 
+        async function pingSessionIfApi() {
+            if (!currentUser || !currentUser.username || currentUser.password == null) return;
+            try {
+                await fetch('/api/ping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: currentUser.username, password: currentUser.password })
+                });
+            } catch (_) { /* offline yoki DB yo'q */ }
+        }
+
+        async function deleteAccountCl() {
+            const pwdEl = document.getElementById('delete-account-password');
+            const pwd = pwdEl ? pwdEl.value : '';
+            if (!pwd) {
+                alert("Parolni kiriting.");
+                return;
+            }
+            if (pwd !== currentUser.password) {
+                alert("Parol noto'g'ri.");
+                return;
+            }
+            if (!confirm("Hisobingiz butunlay o'chiriladi (serverdan). Davom etasizmi?")) return;
+            const uid = currentUser.user_id != null ? currentUser.user_id : currentUser.id;
+            try {
+                const response = await fetch(`/api/users/${encodeURIComponent(uid)}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: pwd })
+                });
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {}
+                if (response.ok && data.success) {
+                    localStorage.removeItem('currentUser');
+                    currentUser = null;
+                    alert("Hisob o'chirildi.");
+                    location.reload();
+                    return;
+                }
+                alert(data.error || "O'chirish muvaffaqiyatsiz (server javobi).");
+            } catch (e) {
+                alert("Server bilan aloqa yo'q yoki DB sozlanmagan.");
+            }
+        }
+
         function saveProfileSettingsCl() {
             const fullName = document.getElementById('edit-full-name').value.trim();
             const bio = document.getElementById('edit-bio').value;
@@ -796,6 +843,14 @@
                     <label style="display:block;font-size:0.7rem;color:#888;margin-bottom:4px;">Yangi parol (takror)</label>
                     <input id="edit-new-password2" type="password" style="width:100%;max-width:480px;padding:10px 12px;margin-bottom:16px;background:#111;border:1px solid #333;border-radius:10px;color:#fff;box-sizing:border-box;">
                     <button type="button" onclick="saveProfileSettingsCl()" style="background: linear-gradient(135deg, var(--primary), var(--secondary)); border: none; padding: 12px 24px; border-radius: 10px; font-family: Orbitron; cursor: pointer; color: #000; font-weight: 600;"><i class="fas fa-save"></i> SAQLASH</button>
+                </div>
+
+                <div style="background: var(--card-bg); border: 1px solid rgba(255,68,68,0.35); border-radius: 20px; padding: 28px; margin-top: 24px;">
+                    <h3 style="font-family: Orbitron; color: #ff6666; margin-bottom: 8px;"><i class="fas fa-skull-crossbones"></i> Xavfli zona</h3>
+                    <p style="color:#888;font-size:0.8rem;margin-bottom:12px;">Hisobni serverdan butunlay o'chirish. 1 yil kirilmasa akkaunt avtomatik o'chirilishi mumkin.</p>
+                    <label style="display:block;font-size:0.7rem;color:#888;margin-bottom:4px;">Tasdiqlash — joriy parol</label>
+                    <input id="delete-account-password" type="password" autocomplete="off" style="width:100%;max-width:480px;padding:10px 12px;margin-bottom:12px;background:#111;border:1px solid #442222;border-radius:10px;color:#fff;box-sizing:border-box;">
+                    <button type="button" onclick="deleteAccountCl()" style="background: rgba(255,68,68,0.25); border: 1px solid #ff4444; color: #ff8888; padding: 12px 24px; border-radius: 10px; font-family: Orbitron; cursor: pointer;"><i class="fas fa-user-slash"></i> HISOBNI O'CHIRISH</button>
                 </div>
             `;
             document.getElementById('page-content').innerHTML = html;
@@ -997,6 +1052,7 @@
                 setExpSkinFromNav('dashboard');
                 renderDashboard();
                 updateSidebar();
+                pingSessionIfApi();
             } else {
                 document.getElementById('reg-modal').style.display = 'flex';
             }
