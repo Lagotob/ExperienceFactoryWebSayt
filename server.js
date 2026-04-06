@@ -1,5 +1,11 @@
 // server.js - Express backend
-// DATABASE_URL muhit o'zgaruvchisida (masalan Neon PostgreSQL). Kodga parol qo'ymang.
+// DATABASE_URL: Render / tizim muhiti yoki loyiha ildizidagi .env (dotenv)
+try {
+    require('dotenv').config();
+} catch (e) {
+    /* dotenv paketi o'rnatilmagan bo'lsa ham server ishga tushsin */
+}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -16,6 +22,15 @@ const connectionString = process.env.DATABASE_URL;
 const pool = connectionString
     ? new Pool({ connectionString })
     : null;
+
+// Salomatlik: brauzer ma'lumotlar bazasi ulangan-yuqligini biladi
+app.get('/api/health', (req, res) => {
+    res.json({
+        ok: true,
+        database: Boolean(pool),
+        hint: pool ? null : 'Set DATABASE_URL in .env (local) or Render Environment (Neon PostgreSQL).'
+    });
+});
 
 if (!pool) {
     console.warn('[EXP] DATABASE_URL o\'rnatilmagan — DB talab qiladigan /api/* 503 qaytaradi (tasks API uchun statik ro\'yxat beriladi).');

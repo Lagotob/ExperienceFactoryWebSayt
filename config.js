@@ -61,6 +61,7 @@ function getProgress(xp) {
 function logout() {
     if (confirm("Tizimdan chiqmoqchimisiz?")) {
         localStorage.removeItem('currentUser');
+        try { localStorage.removeItem('exp_current_user'); } catch (e) {}
         currentUser = null;
         window.location.href = 'login.html';
     }

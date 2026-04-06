@@ -183,13 +183,38 @@
 
     <script src="theme.js"></script>
     <script>
-        const SB_URL = "https://SIZNING_LOYIHA_ID.supabase.co"; 
-        const SB_KEY = "SIZNING_ANON_KEY";
-
         const regForm = document.getElementById('regForm');
         const submitBtn = document.getElementById('submitBtn');
 
-        // Ko'zcha funksiyasi
+        function persistSessionUser(u) {
+            if (!u || typeof u !== 'object') return;
+            if (u.user_id != null && u.id == null) u.id = u.user_id;
+            const s = JSON.stringify(u);
+            localStorage.setItem('currentUser', s);
+            localStorage.setItem('exp_current_user', s);
+            try {
+                const UK = 'exp_factory_users';
+                const arr = JSON.parse(localStorage.getItem(UK)) || [];
+                const uid = u.id || u.user_id;
+                if (uid != null && !arr.some(function (x) { return String(x.id) === String(uid); })) {
+                    arr.push({
+                        id: uid,
+                        username: u.username,
+                        full_name: u.full_name,
+                        password: u.password,
+                        region: u.region,
+                        school: u.school,
+                        xp: u.xp || 0,
+                        coins: u.coins || 0,
+                        completed_tasks: u.completed_tasks || 0,
+                        bio: '',
+                        avatar_data: ''
+                    });
+                    localStorage.setItem(UK, JSON.stringify(arr));
+                }
+            } catch (e) { /* ignore */ }
+        }
+
         document.getElementById('passToggle').addEventListener('click', function() {
             const passInput = document.getElementById('pass');
             const isPass = passInput.type === 'password';
@@ -200,73 +225,60 @@
 
         regForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            
+
             const fullName = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const tgUsername = document.getElementById('tg').value.replace('@', '').trim();
             const password = document.getElementById('pass').value;
             const selectedJobs = Array.from(document.querySelectorAll('#jobContainer input[type="checkbox"]:checked')).map(cb => cb.value);
 
-            if(selectedJobs.length === 0) return alert("⚠️ Kamida bitta yo'nalishni tanlang!");
+            if (selectedJobs.length === 0) return alert("⚠️ Kamida bitta yo'nalishni tanlang!");
+            if (!tgUsername) return alert("Telegram username kiriting.");
 
             submitBtn.innerHTML = '<i class="fas fa-sync fa-spin"></i> CONNECTING...';
             submitBtn.disabled = true;
 
-            const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${tgUsername}`;
-
             try {
-                const response = await fetch(`${SB_URL}/rest/v1/workers`, {
+                const response = await fetch('/api/users', {
                     method: 'POST',
-                    headers: {
-                        "apikey": SB_KEY,
-                        "Authorization": `Bearer ${SB_KEY}`,
-                        "Content-Type": "application/json",
-                        "Prefer": "return=representation"
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        full_name: fullName,
-                        email: email,
                         username: tgUsername,
+                        full_name: fullName,
                         password: password,
-                        specialization: selectedJobs,
-                        coins: 0,
-                        xp: 0,      // Har doim 0 dan boshlanadi
-                        avatar_url: avatarUrl,
-                        is_online: true,
-                        tasks_completed: 0
+                        region: selectedJobs.join(', ') || 'Umumiy',
+                        school: email
                     })
                 });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    localStorage.setItem('currentUser', JSON.stringify(data[0]));
-                    
-                    document.body.innerHTML = `
-                        <div style="text-align:center; font-family:'Orbitron'; color:var(--primary); background:black; height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
-                            <i class="fas fa-user-shield" style="font-size: 5rem; color:#00ff88; text-shadow: 0 0 20px #00ff88;"></i>
-                            <h1 style="margin-top:20px; letter-spacing:5px;">AGENT ACTIVATED</h1>
-                            <p style="color:white; letter-spacing:2px; margin-top:10px;">CORE SYSTEM CONNECTED...</p>
-                        </div>`;
-                    
-                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
-                } else {
-                    alert("Xato: " + (data.message || "Username yoki Email band bo'lishi mumkin."));
-                    submitBtn.innerHTML = 'SYSTEM ACCESS';
-                    submitBtn.disabled = false;
+                let data = {};
+                try {
+                    data = await response.json();
+                } catch (_) {
+                    data = {};
                 }
+
+                if (response.ok && data.success && data.user) {
+                    persistSessionUser(data.user);
+                    document.body.innerHTML =
+                        '<div style="text-align:center;font-family:\'Orbitron\';color:var(--primary);background:#000;height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;">' +
+                        '<i class="fas fa-user-shield" style="font-size:5rem;color:#00ff88;text-shadow:0 0 20px #00ff88;"></i>' +
+                        '<h1 style="margin-top:20px;letter-spacing:5px;">AGENT ACTIVATED</h1>' +
+                        '<p style="color:#fff;letter-spacing:2px;margin-top:10px;">SERVER + PostgreSQL...</p></div>';
+                    setTimeout(function () { window.location.href = 'dashboard.html'; }, 1500);
+                    return;
+                }
+
+                var errMsg = (data && data.error) ? data.error : "Ro'yxatdan o'tish muvaffaqiyatsiz.";
+                if (response.status === 503) {
+                    errMsg = "PostgreSQL ulangan emas. Loyiha ildizida .env fayl yarating: DATABASE_URL=postgresql://... (Neon). Keyin serverni qayta ishga tushiring.";
+                }
+                alert(errMsg);
             } catch (err) {
-                console.error("Supabase Error:", err);
-                // TEST REJIM (Bazaga ulanmaganda ham o'tish uchun)
-                localStorage.setItem('currentUser', JSON.stringify({ 
-                    full_name: fullName, 
-                    username: tgUsername, 
-                    coins: 0,
-                    xp: 0, 
-                    avatar_url: avatarUrl 
-                }));
-                window.location.href = 'dashboard.html';
+                console.error(err);
+                alert("Serverga ulanib bo'lmadi. Avvalo `node server.js` ishga tushiring va brauzerda saytni http://localhost:3000 orqali oching (file:// emas).");
             }
+            submitBtn.innerHTML = 'SYSTEM ACCESS';
+            submitBtn.disabled = false;
         });
     </script>
 </body>

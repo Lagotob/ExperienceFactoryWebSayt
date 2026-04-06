@@ -39,27 +39,47 @@
         <button onclick="handleLogin()" id="loginBtn">ACCESS_GRANTED</button>
         <div class="links"><a href="register.html">YANGI AGENT RO'YXATDAN O'TISH</a></div>
     </div>
-    <script src="config.js"></script>
     <script src="theme.js"></script>
     <script>
+        function persistSessionUser(u) {
+            if (!u || typeof u !== 'object') return;
+            if (u.user_id != null && u.id == null) u.id = u.user_id;
+            var s = JSON.stringify(u);
+            localStorage.setItem('currentUser', s);
+            localStorage.setItem('exp_current_user', s);
+        }
+
         async function handleLogin() {
-            const user = document.getElementById('user').value;
+            const user = document.getElementById('user').value.trim();
             const pass = document.getElementById('pass').value;
             const btn = document.getElementById('loginBtn');
-            if(!user || !pass) return;
-            btn.innerText = "VERIFYING..."; btn.disabled = true;
+            if (!user || !pass) return;
+            btn.innerText = "VERIFYING...";
+            btn.disabled = true;
             try {
-                const res = await fetch(`${SB_URL}/rest/v1/workers?username=eq.${user}&password=eq.${pass}&select=*`, {
-                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username: user, password: pass })
                 });
-                const data = await res.json();
-                if(data.length > 0) {
-                    localStorage.setItem('currentUser', JSON.stringify(data[0]));
+                var data = {};
+                try {
+                    data = await res.json();
+                } catch (_) {}
+                if (res.ok && data.success && data.user) {
+                    persistSessionUser(data.user);
                     window.location.href = 'dashboard.html';
-                } else { throw new Error(); }
+                    return;
+                }
+                throw new Error(data.error || 'denied');
             } catch (e) {
-                btn.style.borderColor = "var(--err)"; btn.innerText = "DENIED";
-                setTimeout(() => { btn.disabled = false; btn.innerText = "ACCESS_GRANTED"; btn.style.borderColor = "var(--p)"; }, 2000);
+                btn.style.borderColor = "var(--err)";
+                btn.innerText = "DENIED";
+                setTimeout(function () {
+                    btn.disabled = false;
+                    btn.innerText = "ACCESS_GRANTED";
+                    btn.style.borderColor = "var(--p)";
+                }, 2000);
             }
         }
     </script>

@@ -490,15 +490,29 @@
 
     <script src="theme.js"></script>
     <script>
-        let currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        let currentUser = null;
+        try {
+            const raw = localStorage.getItem('currentUser') || localStorage.getItem('exp_current_user');
+            if (raw) currentUser = JSON.parse(raw);
+        } catch (_) {
+            currentUser = null;
+        }
         let allTasks = [];
         let sessionSeconds = parseInt(localStorage.getItem('session_time')) || 0;
         let pendingAvatar = null;
 
+        function persistClientUser() {
+            if (!currentUser) return;
+            if (currentUser.user_id != null && currentUser.id == null) currentUser.id = currentUser.user_id;
+            const s = JSON.stringify(currentUser);
+            localStorage.setItem('currentUser', s);
+            localStorage.setItem('exp_current_user', s);
+        }
+
         if (currentUser) {
             if (currentUser.bio === undefined) currentUser.bio = '';
             if (currentUser.avatar_data === undefined) currentUser.avatar_data = '';
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            persistClientUser();
         }
 
         setInterval(() => {
@@ -700,7 +714,7 @@
             if (!confirm("Rasmni olib tashlaysizmi?")) return;
             pendingAvatar = null;
             currentUser.avatar_data = '';
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            persistClientUser();
             renderProfile();
         }
 
@@ -740,6 +754,7 @@
                 } catch (_) {}
                 if (response.ok && data.success) {
                     localStorage.removeItem('currentUser');
+                    localStorage.removeItem('exp_current_user');
                     currentUser = null;
                     alert("Hisob o'chirildi.");
                     location.reload();
@@ -771,7 +786,7 @@
                 currentUser.avatar_data = pendingAvatar;
                 pendingAvatar = null;
             }
-            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            persistClientUser();
             document.getElementById('edit-old-password').value = '';
             document.getElementById('edit-new-password').value = '';
             document.getElementById('edit-new-password2').value = '';
@@ -953,7 +968,7 @@
                     const data = await response.json();
                     if (data.success) {
                         currentUser = data.user;
-                        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                        persistClientUser();
                         alert(`✅ ${itemName} sotib olindi!`);
                         renderMarket();
                         updateSidebar();
@@ -986,7 +1001,7 @@
                 const data = await response.json();
                 if (data.success) {
                     currentUser = data.user;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    persistClientUser();
                     document.getElementById('reg-modal').style.display = 'none';
                     updateUI();
                 } else {
@@ -1016,7 +1031,7 @@
                 const data = await response.json();
                 if (data.success) {
                     currentUser = data.user;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    persistClientUser();
                     document.getElementById('login-modal').style.display = 'none';
                     updateUI();
                 } else {
@@ -1040,6 +1055,7 @@
         function logout() {
             if (confirm("Tizimdan chiqmoqchimisiz?")) {
                 localStorage.removeItem('currentUser');
+                localStorage.removeItem('exp_current_user');
                 currentUser = null;
                 location.reload();
             }
@@ -1112,6 +1128,14 @@
         // Initial load
         window.onload = async () => {
             await loadTasks();
+            try {
+                const h = await fetch('/api/health');
+                const j = await h.json();
+                if (j && j.database === false && !sessionStorage.getItem('exp_warn_db')) {
+                    sessionStorage.setItem('exp_warn_db', '1');
+                    alert("PostgreSQL ulangan emas (DATABASE_URL). Akkauntlar serverda saqlanmaydi. .env (mahalliy) yoki Render → Environment qo'shing (Neon connection string).");
+                }
+            } catch (_) { /* server yo'q */ }
             updateUI();
         };
     </script>
