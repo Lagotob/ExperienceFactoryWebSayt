@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="profile">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil | EXP Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { 
+            --primary: #00f2ff; 
+            --bg: #050505; 
+            --card: #0d0d0d; 
+            --border: #111; 
+            --secondary: #7000ff;
+            --text-dim: #888;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Inter', sans-serif; 
+            display: flex; 
+            min-height: 100vh; 
+            overflow-x: hidden; 
+        }
+
+        /* SIDEBAR */
+        .sidebar { 
+            width: 280px; 
+            background: #000; 
+            border-right: 1px solid var(--border); 
+            position: fixed; 
+            height: 100vh; 
+            display: flex; 
+            flex-direction: column; 
+            z-index: 100; 
+        }
+        .logo { 
+            padding: 40px 30px; 
+            font-family: 'Orbitron'; 
+            font-size: 1.6rem; 
+            color: var(--primary); 
+            letter-spacing: 2px; 
+            text-transform: uppercase; 
+            line-height: 1.2;
+        }
+        
+        .nav-link { 
+            display: flex; 
+            align-items: center; 
+            padding: 20px 30px; 
+            color: #555; 
+            text-decoration: none; 
+            transition: 0.3s; 
+            font-family: 'Orbitron'; 
+            font-size: 0.75rem; 
+            text-transform: uppercase; 
+            border-left: 4px solid transparent; 
+        }
+        .nav-link i { margin-right: 18px; width: 20px; font-size: 1.1rem; text-align: center; }
+        .nav-link.active { 
+            color: white; 
+            background: rgba(0, 242, 255, 0.05); 
+            border-left: 4px solid var(--primary); 
+        }
+        .nav-link:hover { color: #aaa; }
+
+        /* MAIN CONTENT */
+        .main-content { 
+            margin-left: 280px; 
+            padding: 50px; 
+            width: calc(100% - 280px); 
+        }
+        
+        .page-header { margin-bottom: 40px; }
+        .page-header h1 { 
+            font-family: 'Orbitron'; 
+            font-size: 2.2rem; 
+            margin-bottom: 5px; 
+            text-transform: uppercase; 
+        }
+        .page-sub { 
+            color: var(--primary); 
+            font-family: 'Orbitron'; 
+            font-size: 0.7rem; 
+            letter-spacing: 1px; 
+        }
+
+        /* PROFILE CARD */
+        .profile-container {
+            background: var(--card); 
+            border: 1px solid #1a1a1a; 
+            padding: 40px; 
+            border-radius: 15px;
+            max-width: 850px; 
+            display: flex; 
+            gap: 45px; 
+            align-items: center; 
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Dekorativ chiziq */
+        .profile-container::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+        }
+
+        .avatar-box { position: relative; }
+        .profile-img { 
+            width: 160px; 
+            height: 160px; 
+            border-radius: 50%; 
+            border: 4px solid var(--primary); 
+            background: #111; 
+            padding: 5px;
+            object-fit: cover;
+            box-shadow: 0 0 25px rgba(0, 242, 255, 0.15);
+        }
+        .online-indicator { 
+            position: absolute; 
+            bottom: 12px; 
+            right: 12px; 
+            width: 24px; 
+            height: 24px; 
+            background: #00ff88; 
+            border: 4px solid var(--card); 
+            border-radius: 50%; 
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .user-details h2 { 
+            font-family: 'Orbitron'; 
+            font-size: 2.2rem; 
+            color: white; 
+            margin-bottom: 8px; 
+            letter-spacing: -1px;
+        }
+        .badge { 
+            display: inline-block; 
+            padding: 6px 16px; 
+            background: rgba(112, 0, 255, 0.1); 
+            border: 1px solid var(--secondary); 
+            color: #b780ff; 
+            font-family: 'Orbitron'; 
+            font-size: 0.7rem; 
+            border-radius: 6px; 
+            margin-bottom: 20px; 
+            text-transform: uppercase;
+        }
+        .info-row { 
+            color: var(--text-dim); 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            margin-bottom: 12px;
+        }
+        .info-row i { color: var(--primary); width: 18px; text-align: center; }
+
+        /* LOGOUT BUTTON */
+        .btn-logout {
+            margin-top: 25px; 
+            background: #ff3333; 
+            color: white; 
+            border: none;
+            padding: 14px 30px; 
+            border-radius: 10px; 
+            font-family: 'Orbitron';
+            font-size: 0.8rem; 
+            cursor: pointer; 
+            transition: 0.3s ease;
+            display: flex; 
+            align-items: center; 
+            gap: 12px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .btn-logout:hover { 
+            background: #cc0000; 
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(255, 51, 51, 0.3);
+        }
+
+        .sidebar-footer { margin-top: auto; padding-bottom: 20px; }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EXP<br>FACTORY</div>
+        <nav style="flex-grow: 1;">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="tasks.html" class="nav-link"><i class="fas fa-code"></i> <span>Masalalar</span></a>
+            <a href="ranking.html" class="nav-link"><i class="fas fa-award"></i> <span>Leaderboard</span></a>
+            <a href="users.html" class="nav-link"><i class="fas fa-users"></i> <span>Foydalanuvchilar</span></a>
+            <a href="profile.html" class="nav-link active"><i class="fas fa-user-circle"></i> <span>Profil</span></a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-theme-wrap" style="border-top: none; padding-top: 0;">
+                <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            </div>
+            <a href="#" onclick="logout()" class="nav-link" style="color: #ff3333;"><i class="fas fa-sign-out-alt"></i> <span>Chiqish</span></a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="page-header">
+            <h1>SHAXSIY PROFIL</h1>
+            <span class="page-sub">// SOZLAMALAR VA XAVFSIZLIK NAZORATI</span>
+        </div>
+
+        <div class="profile-container">
+            <div class="avatar-box">
+                <img id="user-avatar" src="" alt="User Avatar" class="profile-img">
+                <div class="online-indicator"></div>
+            </div>
+
+            <div class="user-details">
+                <div class="badge" id="user-role">DEVELOPER</div>
+                <h2 id="user-name">---</h2>
+                
+                <div class="info-row">
+                    <i class="fas fa-calendar-check"></i>
+                    <span>Tizimga kirgan sana: <b id="join-date" style="color: white;">--.--.----</b></span>
+                </div>
+                
+                <div class="info-row">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <span>Hudud: <b style="color: white;">Samarqand</b></span>
+                </div>
+
+                <div class="info-row">
+                    <i class="fas fa-university"></i>
+                    <span>O'qish: <b style="color: white;">Muhammad al-Xorazmiy maktabi</b></span>
+                </div>
+                
+                <button class="btn-logout" onclick="logout()">
+                    <i class="fas fa-power-off"></i> TIZIMDAN CHIQISH
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        // Tizim sozlamalari
+        const SB_URL = "https://nltabynzbsdksskaehet.supabase.co"; 
+        const SB_KEY = "sb_publishable_X5gsvBhDXV_UHbUTguTsmg_ZfCixY5Xz5-vR-Z-2E";
+
+        async function loadProfile() {
+            // 1. Foydalanuvchi ma'lumotlarini LocalStorage-dan olish
+            const user = JSON.parse(localStorage.getItem('currentUser'));
+            if (!user) { 
+                window.location.href = 'login.html'; 
+                return; 
+            }
+
+            // 2. UI elementlarini yangilash
+            const displayName = user.username || "User";
+            document.getElementById('user-name').innerText = displayName.toUpperCase();
+            
+            // DiceBear orqali har bir foydalanuvchi uchun unikal bot-avatar generatsiya qilish
+            document.getElementById('user-avatar').src = `https://api.dicebear.com/7.x/bottts/svg?seed=${displayName}`;
+            
+            // Tizimga kirgan (yoki ro'yxatdan o'tgan) sanani formatlash
+            const dateObj = user.created_at ? new Date(user.created_at) : new Date();
+            const formattedDate = dateObj.toLocaleDateString('uz-UZ', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('join-date').innerText = formattedDate;
+
+            // Rolni tekshirish
+            if (user.role) {
+                document.getElementById('user-role').innerText = user.role.toUpperCase();
+            }
+        }
+
+        // Tizimdan chiqish funksiyasi
+        function logout() {
+            if(confirm("Tizimdan chiqishni tasdiqlaysizmi?")) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'login.html';
+            }
+        }
+
+        // Sahifa yuklanganda ishga tushirish
+        window.onload = loadProfile;
+    </script>
+</body>
+</html>

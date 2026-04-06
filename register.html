@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="auth">
+<head>
+    <meta charset="UTF-8">
+    <title>Ro'yxatdan o'tish | EXP Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #00f2ff; --secondary: #7000ff; --bg: #030303; --card-bg: rgba(13, 13, 13, 0.9); }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: var(--bg); 
+            color: white; 
+            font-family: 'Inter'; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            overflow: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: "";
+            position: absolute;
+            width: 400px; height: 400px;
+            background: var(--secondary);
+            filter: blur(150px);
+            top: -10%; left: -10%;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 35px; 
+            border-radius: 25px; 
+            border: 1px solid rgba(0, 242, 255, 0.15); 
+            width: 450px; 
+            backdrop-filter: blur(15px); 
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.1);
+        }
+
+        h2 { 
+            font-family: 'Orbitron'; 
+            text-align: center; 
+            color: var(--primary); 
+            margin-bottom: 25px; 
+            letter-spacing: 4px;
+            text-shadow: 0 0 10px var(--primary);
+        }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 6px; font-size: 0.7rem; color: #aaa; font-family: 'Orbitron'; text-transform: uppercase; }
+        
+        .input-wrapper { position: relative; }
+        .input-wrapper i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: #444; transition: 0.3s; }
+        
+        input { 
+            width: 100%; 
+            padding: 12px 12px 12px 45px; 
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid #222; 
+            color: white; 
+            border-radius: 10px; 
+            outline: none; 
+            transition: 0.3s;
+        }
+        
+        input:focus { border-color: var(--primary); background: rgba(0, 242, 255, 0.08); box-shadow: 0 0 10px rgba(0, 242, 255, 0.2); }
+        input:focus + i { color: var(--primary); }
+
+        .job-grid { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            background: rgba(0,0,0,0.4); 
+            padding: 12px; 
+            border-radius: 10px; 
+            border: 1px solid #1a1a1a; 
+            max-height: 150px; 
+            overflow-y: auto; 
+        }
+        
+        .job-item { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            font-size: 0.75rem; 
+            cursor: pointer; 
+            padding: 4px;
+            transition: 0.2s;
+        }
+        .job-item input { width: auto; accent-color: var(--primary); cursor: pointer; }
+
+        .btn-reg { 
+            width: 100%; 
+            padding: 15px; 
+            background: linear-gradient(45deg, var(--primary), var(--secondary)); 
+            border: none; 
+            border-radius: 10px; 
+            color: white; 
+            font-family: 'Orbitron';
+            font-weight: 900; 
+            cursor: pointer; 
+            margin-top: 20px; 
+            transition: 0.4s;
+            letter-spacing: 1.5px;
+        }
+
+        .btn-reg:hover:not(:disabled) { 
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.5);
+            transform: scale(1.02);
+        }
+
+        .btn-reg:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .link { text-align: center; margin-top: 15px; font-size: 0.8rem; color: #555; }
+        .link a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        #passToggle { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #444; }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+    <button type="button" class="theme-toggle theme-toggle-float" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+
+    <div class="card">
+        <h2>INITIALIZE</h2>
+        <form id="regForm">
+            <div class="form-group">
+                <label>To'liq ism-familya</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-user-circle"></i>
+                    <input type="text" id="name" placeholder="Ismingizni kiriting" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Elektron pochta</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" placeholder="agent@exp.com" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Ixtisoslashuv yo'nalishi</label>
+                <div class="job-grid" id="jobContainer">
+                    <label class="job-item"><input type="checkbox" value="Frontend"> Frontend</label>
+                    <label class="job-item"><input type="checkbox" value="Backend"> Backend</label>
+                    <label class="job-item"><input type="checkbox" value="Grafik Dizayn"> Grafik Dizayn</label>
+                    <label class="job-item"><input type="checkbox" value="UI/UX Dizayn"> UI/UX Dizayn</label>
+                    <label class="job-item"><input type="checkbox" value="SMM"> SMM</label>
+                    <label class="job-item"><input type="checkbox" value="Mobile App"> Mobile App</label>
+                    <label class="job-item"><input type="checkbox" value="Kiber Xavfsizlik"> Kiber Xavfsizlik</label>
+                    <label class="job-item"><input type="checkbox" value="Video Montaj"> Video Montaj</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Telegram @username</label>
+                <div class="input-wrapper">
+                    <i class="fab fa-telegram-plane"></i>
+                    <input type="text" id="tg" placeholder="username" required>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Tizim paroli</label>
+                <div class="input-wrapper">
+                    <i class="fas fa-key"></i>
+                    <input type="password" id="pass" placeholder="••••••••" required>
+                    <i class="fas fa-eye" id="passToggle"></i>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-reg" id="submitBtn">SYSTEM ACCESS</button>
+        </form>
+        <div class="link">Tizimda bormisiz? <a href="login.html">Login</a></div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        const SB_URL = "https://SIZNING_LOYIHA_ID.supabase.co"; 
+        const SB_KEY = "SIZNING_ANON_KEY";
+
+        const regForm = document.getElementById('regForm');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Ko'zcha funksiyasi
+        document.getElementById('passToggle').addEventListener('click', function() {
+            const passInput = document.getElementById('pass');
+            const isPass = passInput.type === 'password';
+            passInput.type = isPass ? 'text' : 'password';
+            this.classList.toggle('fa-eye', !isPass);
+            this.classList.toggle('fa-eye-slash', isPass);
+        });
+
+        regForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const fullName = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const tgUsername = document.getElementById('tg').value.replace('@', '').trim();
+            const password = document.getElementById('pass').value;
+            const selectedJobs = Array.from(document.querySelectorAll('#jobContainer input[type="checkbox"]:checked')).map(cb => cb.value);
+
+            if(selectedJobs.length === 0) return alert("⚠️ Kamida bitta yo'nalishni tanlang!");
+
+            submitBtn.innerHTML = '<i class="fas fa-sync fa-spin"></i> CONNECTING...';
+            submitBtn.disabled = true;
+
+            const avatarUrl = `https://api.dicebear.com/7.x/bottts/svg?seed=${tgUsername}`;
+
+            try {
+                const response = await fetch(`${SB_URL}/rest/v1/workers`, {
+                    method: 'POST',
+                    headers: {
+                        "apikey": SB_KEY,
+                        "Authorization": `Bearer ${SB_KEY}`,
+                        "Content-Type": "application/json",
+                        "Prefer": "return=representation"
+                    },
+                    body: JSON.stringify({
+                        full_name: fullName,
+                        email: email,
+                        username: tgUsername,
+                        password: password,
+                        specialization: selectedJobs,
+                        coins: 0,
+                        xp: 0,      // Har doim 0 dan boshlanadi
+                        avatar_url: avatarUrl,
+                        is_online: true,
+                        tasks_completed: 0
+                    })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('currentUser', JSON.stringify(data[0]));
+                    
+                    document.body.innerHTML = `
+                        <div style="text-align:center; font-family:'Orbitron'; color:var(--primary); background:black; height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center;">
+                            <i class="fas fa-user-shield" style="font-size: 5rem; color:#00ff88; text-shadow: 0 0 20px #00ff88;"></i>
+                            <h1 style="margin-top:20px; letter-spacing:5px;">AGENT ACTIVATED</h1>
+                            <p style="color:white; letter-spacing:2px; margin-top:10px;">CORE SYSTEM CONNECTED...</p>
+                        </div>`;
+                    
+                    setTimeout(() => window.location.href = 'dashboard.html', 2000);
+                } else {
+                    alert("Xato: " + (data.message || "Username yoki Email band bo'lishi mumkin."));
+                    submitBtn.innerHTML = 'SYSTEM ACCESS';
+                    submitBtn.disabled = false;
+                }
+            } catch (err) {
+                console.error("Supabase Error:", err);
+                // TEST REJIM (Bazaga ulanmaganda ham o'tish uchun)
+                localStorage.setItem('currentUser', JSON.stringify({ 
+                    full_name: fullName, 
+                    username: tgUsername, 
+                    coins: 0,
+                    xp: 0, 
+                    avatar_url: avatarUrl 
+                }));
+                window.location.href = 'dashboard.html';
+            }
+        });
+    </script>
+</body>
+</html>

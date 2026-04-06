@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="rank">
+<head>
+    <meta charset="UTF-8">
+    <title>Leaderboard | EXP Factory Core</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #00f2ff; --secondary: #7000ff; --bg: #030303; --card: #0d0d0d; --gold: #FFD700; --silver: #C0C0C0; --bronze: #CD7F32; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: white; font-family: 'Inter'; display: flex; min-height: 100vh; overflow-x: hidden; }
+
+        /* Sidebar */
+        .sidebar { width: 280px; background: #080808; border-right: 1px solid #1a1a1a; position: fixed; height: 100vh; z-index: 100; }
+        .logo { padding: 40px 30px; font-family: 'Orbitron'; font-size: 1.5rem; color: var(--primary); letter-spacing: 2px; }
+        .nav-link { display: flex; align-items: center; padding: 18px 30px; color: #666; text-decoration: none; transition: 0.4s; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .nav-link i { margin-right: 15px; width: 20px; text-align: center; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--primary); }
+
+        .rank-content { margin-left: 280px; padding: 50px; width: calc(100% - 280px); background: radial-gradient(circle at top right, #110022 0%, #030303 50%); }
+
+        /* Podium Design */
+        .podium { display: flex; justify-content: center; align-items: flex-end; gap: 20px; margin: 80px 0 60px; height: 350px; }
+        .podium-item { background: var(--card); border: 1px solid #222; border-radius: 25px 25px 15px 15px; position: relative; display: flex; flex-direction: column; align-items: center; transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding-bottom: 20px; }
+        .podium-item:hover { transform: translateY(-10px); border-color: var(--primary); }
+        
+        .p-avatar { width: 100px; height: 100px; border-radius: 50%; border: 4px solid; margin-top: -50px; background: #111; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
+        .p-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .p-name { margin-top: 15px; font-family: 'Orbitron'; font-size: 0.9rem; color: #fff; text-align: center; width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .p-xp { color: var(--primary); font-family: 'Orbitron'; font-size: 1.1rem; margin: 5px 0; }
+
+        .rank-2 { height: 210px; width: 190px; order: 1; border-color: var(--silver); }
+        .rank-1 { height: 290px; width: 230px; order: 2; border-color: var(--gold); background: linear-gradient(180deg, #151515 0%, var(--card) 100%); z-index: 2; }
+        .rank-3 { height: 180px; width: 190px; order: 3; border-color: var(--bronze); }
+
+        .crown { position: absolute; top: -85px; font-size: 2.5rem; color: var(--gold); animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        /* Table */
+        .ranking-table { background: var(--card); border-radius: 25px; border: 1px solid #1a1a1a; overflow: hidden; max-width: 1000px; margin: 0 auto; margin-bottom: 50px; }
+        .r-row { display: grid; grid-template-columns: 70px 70px 1fr 180px 140px; padding: 15px 25px; border-bottom: 1px solid #151515; align-items: center; transition: 0.3s; }
+        .r-row:hover { background: rgba(255,255,255,0.02); }
+        .r-header { background: #080808; font-family: 'Orbitron'; color: #444; font-size: 0.65rem; letter-spacing: 2px; }
+        
+        .r-num { font-family: 'Orbitron'; font-size: 1rem; color: #444; }
+        .r-avatar-mini { width: 45px; height: 45px; border-radius: 12px; border: 1px solid #333; overflow: hidden; }
+        .r-avatar-mini img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .r-lvl-box { display: flex; flex-direction: column; gap: 4px; }
+        .lvl-bar { width: 100px; height: 4px; background: #222; border-radius: 10px; overflow: hidden; }
+        .lvl-fill { height: 100%; background: var(--secondary); box-shadow: 0 0 8px var(--secondary); transition: 1s; }
+
+        .r-xp { font-family: 'Orbitron'; color: var(--primary); text-align: right; font-size: 1rem; }
+        .me { background: rgba(112, 0, 255, 0.04); border-left: 4px solid var(--secondary); }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EXP FACTORY</div>
+        <nav style="margin-top: 20px;">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="tasks.html" class="nav-link"><i class="fas fa-code"></i> <span>Masalalar</span></a>
+            <a href="ranking.html" class="nav-link active"><i class="fas fa-award"></i> <span>Leaderboard</span></a>
+            <a href="users-list.html" class="nav-link"><i class="fas fa-users"></i> <span>Foydalanuvchilar</span></a>
+            <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i> <span>Profil</span></a>
+        </nav>
+        <div class="sidebar-bottom-stack">
+            <div class="sidebar-theme-wrap">
+                <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="rank-content">
+        <h1 style="font-family: 'Orbitron'; font-size: 2.5rem; text-align: center; letter-spacing: 5px; margin-bottom: 10px;">WORLD_RANKING</h1>
+        <p style="text-align: center; color: #555; font-family: 'Orbitron'; font-size: 0.7rem; margin-bottom: 30px;">GLOBAL_SYSTEM_RECORDS_V2.0</p>
+        
+        <div class="podium" id="topPodium">
+            <div style="color: var(--primary); font-family: 'Orbitron';">Sinxronizatsiya qilinmoqda...</div>
+        </div>
+
+        <div class="ranking-table">
+            <div class="r-row r-header">
+                <div>RANK</div><div>AVATAR</div><div>FOYDALANUVCHI</div><div>PROGRESS</div><div style="text-align: right;">XP_SCORE</div>
+            </div>
+            <div id="tableBody">
+                </div>
+        </div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        // 1. Supabase API Sozlamalari (O'zingiznikini qo'ying)
+        const SB_URL = "https://SIZNING_LOYIHA_ID.supabase.co"; 
+        const SB_KEY = "SIZNING_ANON_KEY";
+
+        // LocalStorage'dan bizning loginimizni aniqlash (SIZ deb yozish uchun)
+        const storedUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+        const myUsername = storedUser.username || "";
+
+        async function fetchLeaderboard() {
+            try {
+                // XP bo'yicha kamayish tartibida (desc) barcha foydalanuvchilarni olamiz
+                const response = await fetch(`${SB_URL}/rest/v1/workers?select=*&order=xp.desc`, {
+                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+                });
+                const users = await response.json();
+
+                if (users && users.length > 0) {
+                    renderLeaderboard(users);
+                }
+            } catch (err) {
+                console.error("Reytingni yuklashda xato:", err);
+                document.getElementById('tableBody').innerHTML = '<div style="color:red; text-align:center; padding:20px;">ULANISHDA XATOLIK!</div>';
+            }
+        }
+
+        function renderLeaderboard(users) {
+            const podium = document.getElementById('topPodium');
+            const tableBody = document.getElementById('tableBody');
+            
+            podium.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            // A. Shohsupa (Podium) - 2-o'rin, 1-o'rin, 3-o'rin tartibida
+            const podiumOrder = [1, 0, 2]; 
+            const config = {
+                0: { color: 'var(--gold)', class: 'rank-1', icon: '<i class="fas fa-crown crown"></i>' },
+                1: { color: 'var(--silver)', class: 'rank-2', icon: '' },
+                2: { color: 'var(--bronze)', class: 'rank-3', icon: '' }
+            };
+
+            podiumOrder.forEach((idx) => {
+                const user = users[idx];
+                if (!user) return;
+                const setup = config[idx];
+                
+                podium.innerHTML += `
+                    <div class="podium-item ${setup.class}">
+                        ${setup.icon}
+                        <div class="p-avatar" style="border-color: ${setup.color}">
+                            <img src="${user.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username}`}" alt="User">
+                        </div>
+                        <div class="p-name">${user.full_name}</div>
+                        <div class="p-xp">${(user.xp || 0).toLocaleString()} XP</div>
+                        <div style="color:${setup.color}; font-family:'Orbitron'; font-weight: 900;">#${idx + 1}</div>
+                    </div>
+                `;
+            });
+
+            // B. Umumiy Jadval
+            users.forEach((user, index) => {
+                const isMe = user.username === myUsername;
+                const level = Math.floor((user.xp || 0) / 1000) + 1;
+                const progress = ((user.xp % 1000) / 1000) * 100;
+
+                tableBody.innerHTML += `
+                    <div class="r-row ${isMe ? 'me' : ''}">
+                        <div class="r-num">#${(index + 1).toString().padStart(2, '0')}</div>
+                        <div class="r-avatar-mini">
+                            <img src="${user.avatar_url || `https://api.dicebear.com/7.x/bottts/svg?seed=${user.username}`}" alt="Avatar">
+                        </div>
+                        <div class="r-name" style="font-family:'Orbitron'; font-size:0.8rem; color:#eee;">
+                            ${user.full_name} ${isMe ? '<small style="color:var(--primary); margin-left:10px;">(SIZ)</small>' : ''}
+                        </div>
+                        <div class="r-lvl-box">
+                            <div style="font-family:'Orbitron'; font-size:0.55rem; color:#555;">LVL ${level}</div>
+                            <div class="lvl-bar"><div class="lvl-fill" style="width: ${progress || 5}%;"></div></div>
+                        </div>
+                        <div class="r-xp">${(user.xp || 0).toLocaleString()} XP</div>
+                    </div>
+                `;
+            });
+        }
+
+        window.onload = fetchLeaderboard;
+    </script>
+</body>
+</html>

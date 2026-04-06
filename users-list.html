@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="users">
+<head>
+    <meta charset="UTF-8">
+    <title>Foydalanuvchilar | EXP Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00f2ff; --secondary: #7000ff;
+            --bg-dark: #050505; --card-bg: #0d0d0d;
+            --border: 1px solid rgba(0, 242, 255, 0.1);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: var(--bg-dark); color: white; font-family: 'Inter', sans-serif; display: flex; }
+
+        /* SIDEBAR */
+        .sidebar { width: 260px; background: #080808; border-right: 1px solid #1a1a1a; height: 100vh; position: fixed; padding: 30px 0; z-index: 100; }
+        .logo { font-family: 'Orbitron'; color: var(--primary); font-size: 1.2rem; text-align: center; letter-spacing: 3px; margin-bottom: 30px; }
+        .nav-link { padding: 15px 30px; display: flex; align-items: center; gap: 15px; color: #666; text-decoration: none; transition: 0.3s; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--primary); }
+
+        /* MAIN CONTENT */
+        .main-content { margin-left: 260px; width: calc(100% - 260px); padding: 40px; }
+        .page-title { font-family: 'Orbitron'; font-size: 2rem; margin-bottom: 30px; letter-spacing: 2px; }
+
+        /* TOOLBAR */
+        .toolbar { display: grid; grid-template-columns: 2fr 1fr; gap: 15px; margin-bottom: 30px; }
+        .search-box { position: relative; }
+        .search-box i { position: absolute; left: 15px; top: 50%; transform: translateY(-50%); color: var(--primary); }
+        .toolbar input, .toolbar select {
+            width: 100%; background: #000; border: 1px solid #222; padding: 12px 15px 12px 45px;
+            border-radius: 8px; color: white; outline: none;
+        }
+
+        /* TABLE */
+        .table-card { background: var(--card-bg); border-radius: 15px; border: var(--border); overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; }
+        th { padding: 20px; text-align: left; color: #444; font-family: 'Orbitron'; font-size: 0.7rem; border-bottom: 1px solid #1a1a1a; }
+        td { padding: 18px 20px; border-bottom: 1px solid #151515; font-size: 0.9rem; }
+        
+        .user-info { display: flex; align-items: center; gap: 12px; }
+        .user-info img { width: 35px; height: 35px; border-radius: 8px; border: 1px solid #222; }
+        .user-name { color: #ccc; text-decoration: none; font-weight: 600; }
+        .user-name:hover { color: var(--primary); }
+
+        .xp-badge { font-family: 'Orbitron'; color: var(--primary); }
+        .lvl-tag { background: rgba(112, 0, 255, 0.1); color: #b07cff; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; border: 1px solid rgba(112, 0, 255, 0.3); }
+
+        .status-online { color: #00ff88; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; }
+        .dot { height: 8px; width: 8px; background-color: #00ff88; border-radius: 50%; box-shadow: 0 0 8px #00ff88; animation: pulse 2s infinite; }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); opacity: 1; }
+            70% { transform: scale(1.2); opacity: 0.5; }
+            100% { transform: scale(0.95); opacity: 1; }
+        }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EXP FACTORY</div>
+        <nav style="margin-top: 20px;">
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="tasks.html" class="nav-link"><i class="fas fa-code"></i> <span>Masalalar</span></a>
+            <a href="ranking.html" class="nav-link"><i class="fas fa-award"></i> <span>Leaderboard</span></a>
+            <a href="users-list.html" class="nav-link active"><i class="fas fa-users"></i> <span>Foydalanuvchilar</span></a>
+            <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i> <span>Profil</span></a>
+        </nav>
+        <div class="sidebar-bottom-stack">
+            <div class="sidebar-theme-wrap">
+                <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <h1 class="page-title">SYSTEM_USERS</h1>
+
+        <div class="toolbar">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="userInput" placeholder="Ism yoki Username orqali qidirish...">
+            </div>
+            <select id="sortSelect">
+                <option value="xp">Saralash: XP (Eng yuqori)</option>
+                <option value="lvl">Saralash: Level</option>
+            </select>
+        </div>
+
+        <div class="table-card">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#ID</th>
+                        <th>FOYDALANUVCHI</th>
+                        <th>DARAJA</th>
+                        <th>TAJRIBA (XP)</th>
+                        <th>STATUS</th>
+                    </tr>
+                </thead>
+                <tbody id="userListBody">
+                    </tbody>
+            </table>
+            <div id="noResult" style="display:none; padding: 40px; text-align: center; color: #444; font-family: 'Orbitron';">
+                Hech kim topilmadi...
+            </div>
+        </div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        // 1. Supabase Sozlamalari (Sening loyihang uchun)
+        const SB_URL = "https://nltabynzbsdksskaehet.supabase.co";
+        const SB_KEY = "sb_publishable_X5gsvBhDXV_UHbUTguTsmg_ZfCixY5Xz5-vR-Z-2E";
+
+        const listBody = document.getElementById('userListBody');
+        const searchInput = document.getElementById('userInput');
+        const sortSelect = document.getElementById('sortSelect');
+
+        let allUsers = [];
+
+        // 2. Foydalanuvchilarni Supabase'dan yuklash
+        async function fetchUsers() {
+            try {
+                const response = await fetch(`${SB_URL}/rest/v1/workers?select=*`, {
+                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+                });
+                allUsers = await response.json();
+                sortAndRender('xp');
+            } catch (error) {
+                console.error("Xatolik:", error);
+                listBody.innerHTML = '<tr><td colspan="5" style="text-align:center; color:red;">Ma\'lumot yuklashda xato yuz berdi.</td></tr>';
+            }
+        }
+
+        // 3. Render qilish funksiyasi
+        function renderUsers(data) {
+            listBody.innerHTML = '';
+            
+            if (data.length === 0) {
+                document.getElementById('noResult').style.display = 'block';
+                return;
+            }
+            document.getElementById('noResult').style.display = 'none';
+
+            data.forEach((user, index) => {
+                const xp = user.xp || 0;
+                const level = Math.floor(xp / 1000) + 1;
+                const name = user.full_name || user.username || "Unknown Agent";
+                const displayId = user.id.toString().slice(-4);
+
+                const row = `
+                    <tr>
+                        <td style="color: #444; font-family: 'Orbitron';">#${displayId}</td>
+                        <td>
+                            <div class="user-info">
+                                <img src="https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff" alt="Avatar">
+                                <a href="profile.html?id=${user.id}" class="user-name">${name}</a>
+                            </div>
+                        </td>
+                        <td><span class="lvl-tag">LVL ${level}</span></td>
+                        <td><span class="xp-badge">${xp.toLocaleString()}</span></td>
+                        <td>
+                            <span class="status-online"><span class="dot"></span> Online</span>
+                        </td>
+                    </tr>
+                `;
+                listBody.innerHTML += row;
+            });
+        }
+
+        // 4. Qidiruv va Saralash
+        function sortAndRender(criteria) {
+            let sorted = [...allUsers];
+            if (criteria === 'xp' || criteria === 'lvl') {
+                sorted.sort((a, b) => (b.xp || 0) - (a.xp || 0));
+            }
+            renderUsers(sorted);
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+            const filtered = allUsers.filter(u => 
+                (u.full_name && u.full_name.toLowerCase().includes(val)) || 
+                (u.username && u.username.toLowerCase().includes(val))
+            );
+            renderUsers(filtered);
+        });
+
+        sortSelect.addEventListener('change', (e) => sortAndRender(e.target.value));
+
+        window.onload = fetchUsers;
+    </script>
+</body>
+</html>

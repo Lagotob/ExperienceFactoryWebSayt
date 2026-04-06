@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="tasks">
+<head>
+    <meta charset="UTF-8">
+    <title>Vazifa Ko'rish | EXP Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root { --primary: #00f2ff; --secondary: #7000ff; --bg: #030303; --card: #0d0d0d; }
+        body { background: var(--bg); color: white; font-family: 'Inter'; margin: 0; display: flex; min-height: 100vh; }
+        
+        /* Sidebar */
+        .sidebar { width: 280px; background: #080808; border-right: 1px solid #1a1a1a; position: fixed; height: 100vh; display: flex; flex-direction: column; z-index: 100; }
+        .logo { padding: 40px 30px; font-family: 'Orbitron'; font-size: 1.5rem; color: var(--primary); border-bottom: 1px solid #1a1a1a; letter-spacing: 2px; }
+        .nav-link { display: flex; align-items: center; padding: 18px 30px; color: #666; text-decoration: none; transition: 0.4s; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--primary); }
+        .nav-link i { margin-right: 15px; width: 20px; text-align: center; }
+
+        /* Main Content */
+        .main-content { margin-left: 280px; padding: 50px; width: calc(100% - 280px); display: flex; justify-content: center; }
+        .container { max-width: 900px; width: 100%; }
+        
+        .back-link { color: #555; text-decoration: none; transition: 0.3s; display: inline-flex; align-items: center; gap: 10px; margin-bottom: 30px; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .back-link:hover { color: var(--primary); letter-spacing: 1px; }
+
+        .task-header { background: var(--card); border: 1px solid #222; padding: 40px; border-radius: 20px; margin-bottom: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        .task-header h1 { font-family: 'Orbitron'; color: var(--primary); margin: 0; font-size: 2.2rem; }
+        .task-meta { display: flex; gap: 30px; margin-top: 20px; color: #888; font-size: 0.85rem; }
+        .task-meta b { color: #ccc; font-family: 'Orbitron'; }
+
+        .content-card { background: var(--card); border: 1px solid #222; padding: 40px; border-radius: 20px; line-height: 1.8; color: #bbb; margin-bottom: 50px; }
+        .content-card h2 { color: white; font-family: 'Orbitron'; font-size: 1.3rem; border-bottom: 1px solid #222; padding-bottom: 15px; margin-bottom: 25px; }
+        
+        /* Floating Button */
+        .btn-submit { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 15px 35px; border-radius: 12px; color: white; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; transition: 0.3s; box-shadow: 0 10px 20px rgba(112, 0, 255, 0.2); }
+        .btn-submit:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 242, 255, 0.3); }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(10px); }
+        .modal-card { background: #0a0a0a; border: 1px solid #333; width: 500px; padding: 40px; border-radius: 20px; text-align: center; }
+        textarea { width: 100%; height: 120px; background: #000; border: 1px solid #333; border-radius: 12px; color: white; padding: 15px; margin: 20px 0; outline: none; resize: none; }
+        .modal-btns { display: flex; gap: 10px; }
+        .btn-send { flex: 2; background: var(--primary); border: none; padding: 15px; border-radius: 10px; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; }
+        .btn-cancel { flex: 1; background: #222; border: none; color: white; padding: 15px; border-radius: 10px; cursor: pointer; font-family: 'Orbitron'; }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EXP FACTORY</div>
+        <nav style="margin-top: 20px;">
+            <a href="client.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="tasks.html" class="nav-link active"><i class="fas fa-code"></i> <span>Masalalar</span></a>
+            <a href="ranking.html" class="nav-link"><i class="fas fa-award"></i> <span>Leaderboard</span></a>
+            <a href="Marketplace.html" class="nav-link"><i class="fas fa-shopping-bag"></i> <span>Savdo (1=1)</span></a>
+            <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i> <span>Profil</span></a>
+        </nav>
+        <div class="sidebar-bottom-stack">
+            <div class="sidebar-theme-wrap">
+                <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="container">
+            <a href="tasks.html" class="back-link"><i class="fas fa-arrow-left"></i> ORQAGA QAYTISH</a>
+            
+            <div id="task-loader" style="text-align: center; padding: 50px; font-family: 'Orbitron'; color: var(--primary);">
+                <i class="fas fa-spinner fa-spin"></i> MA'LUMOTLAR YUKLANMOQDA...
+            </div>
+
+            <div id="task-content" style="display: none;">
+                <div class="task-header">
+                    <h1 id="task-title">Vazifa nomi</h1>
+                    <div class="task-meta">
+                        <span>ID: <b id="task-id">#000</b></span>
+                        <span>Qiyinchilik: <b id="task-diff" style="color: #00ff88;">-</b></span>
+                        <span>Mukofot: <b id="task-reward" style="color: #ffcc00;">0 <i class="fas fa-coins"></i></b></span>
+                    </div>
+                </div>
+
+                <div class="content-card">
+                    <h2>Vazifa tavsifi</h2>
+                    <div id="task-desc">
+                        Ma'lumot topilmadi.
+                    </div>
+                    <div style="margin-top: 30px; padding: 20px; background: rgba(0,242,255,0.05); border-left: 4px solid var(--primary); border-radius: 4px;">
+                        <strong>Eslatma:</strong> Yechim sifatida GitHub linki yoki loyiha manzilini yuboring.
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <button class="btn-submit" onclick="openModal()"><i class="fas fa-paper-plane"></i> TOPSHIRISH</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="modal">
+        <div class="modal-card">
+            <h2 style="font-family: 'Orbitron'; color: var(--primary);">YECHIMNI YUBORISH</h2>
+            <p style="color: #666; font-size: 0.9rem;">Loyiha kodi yoki GitHub linkini kiriting:</p>
+            <textarea id="solutionLink" placeholder="https://github.com/username/project..."></textarea>
+            <div class="modal-btns">
+                <button class="btn-cancel" onclick="closeModal()">BEKOR QILISH</button>
+                <button class="btn-send" id="sendBtn" onclick="sendSolution()">YUBORISH</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        // 1. Sozlamalar
+const SB_URL = "https://SIZNING_LOYIHA_ID.supabase.co";
+const SB_KEY = "SIZNING_ANON_KEY";
+
+const tg = window.Telegram?.WebApp;
+const params = new URLSearchParams(window.location.search);
+const taskId = params.get('id');
+let currentTask = null;
+
+function appAlert(msg) {
+    if (tg && typeof tg.showAlert === 'function') tg.showAlert(msg);
+    else alert(msg);
+}
+function appConfirm(msg, onResult) {
+    if (tg && typeof tg.showConfirm === 'function') {
+        tg.showConfirm(msg, onResult);
+    } else {
+        onResult(confirm(msg));
+    }
+}
+
+// 2. Vazifa ma'lumotlarini yuklash
+async function fetchTaskDetail() {
+    if (!taskId) {
+        document.getElementById('task-loader').innerText = "ID TOPILMADI!";
+        return;
+    }
+
+    try {
+        const response = await fetch(`${SB_URL}/rest/v1/tasks?id=eq.${taskId}`, {
+            headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+        });
+        const data = await response.json();
+
+        if (data.length > 0) {
+            currentTask = data[0];
+            renderTask(currentTask);
+        } else {
+            document.getElementById('task-loader').innerText = "VAZIFA TOPILMADI!";
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById('task-loader').innerText = "XATOLIK YUZ BERDI!";
+    }
+}
+
+function renderTask(task) {
+    document.getElementById('task-loader').style.display = 'none';
+    document.getElementById('task-content').style.display = 'block';
+    
+    document.getElementById('task-title').innerText = task.title;
+    document.getElementById('task-id').innerText = "#" + task.id;
+    document.getElementById('task-diff').innerText = task.difficulty.toUpperCase();
+    document.getElementById('task-reward').innerHTML = `${task.reward_xp} <i class="fas fa-coins"></i>`;
+    document.getElementById('task-desc').innerText = task.description || "Tavsif mavjud emas.";
+
+    // Qiyinchilikka qarab rangni o'zgartirish
+    const diffColor = { oson: "#00ff88", orta: "#ffc107", qiyin: "#ff4444" };
+    document.getElementById('task-diff').style.color = diffColor[task.difficulty] || "#fff";
+}
+
+// 3. Yechimni yuborish (Backend-ga yozish)
+async function sendSolution() {
+    const solutionUrl = document.getElementById('solutionLink').value;
+    const user = tg?.initDataUnsafe?.user || { id: 12345, first_name: "Test" };
+
+    if (solutionUrl.length < 5) {
+        appAlert("Iltimos, haqiqiy link yoki yechimni kiriting!");
+        return;
+    }
+
+    const btn = document.getElementById('sendBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> YUBORILMOQDA...';
+    btn.disabled = true;
+
+    try {
+        // 'submissions' jadvaliga yechimni qo'shamiz
+        const response = await fetch(`${SB_URL}/rest/v1/submissions`, {
+            method: "POST",
+            headers: { 
+                "apikey": SB_KEY, 
+                "Authorization": `Bearer ${SB_KEY}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                worker_tg_id: user.id,
+                worker_name: user.first_name,
+                task_id: taskId,
+                task_title: currentTask.title,
+                solution_link: solutionUrl,
+                status: 'pending' // Tekshirilmoqda statusi
+            })
+        });
+
+        if (response.ok) {
+            appConfirm("Yechim yuborildi! Vazifalar ro'yxatiga qaytasizmi?", (ok) => {
+                if (ok) window.location.href = 'tasks.html';
+                else {
+                    btn.innerHTML = 'YUBORISH';
+                    btn.disabled = false;
+                }
+            });
+        } else {
+            appAlert("Yuborish muvaffaqiyatsiz. Qayta urinib ko'ring.");
+            btn.innerHTML = 'YUBORISH';
+            btn.disabled = false;
+        }
+    } catch (err) {
+        appAlert("Xatolik: Tarmoqni tekshiring!");
+        btn.innerHTML = 'YUBORISH';
+        btn.disabled = false;
+    }
+}
+
+// Modal boshqaruvi
+function openModal() { document.getElementById('modal').style.display = 'flex'; }
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+
+window.onload = fetchTaskDetail;
+    </script>
+</body>
+</html>

@@ -1,0 +1,577 @@
+/* EXP Factory — yorug' mavzu o'zgaruvchilari va umumiy komponentlar */
+
+/* ========== Har sahifa uchun alohida fon rasmi (data-exp-skin) + mavzu ========== */
+/* Skinlar: landing | auth | dashboard | market | tasks | rank | profile | users */
+:root {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="landing"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="auth"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1633265486274-390076a4a10c?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="dashboard"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1521737711867-e3b97375f902?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="market"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="tasks"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1461749280684-dccba630e2f6?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="rank"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1567427017947-699c5fa5db6e?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="profile"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?auto=format&fit=crop&w=1920&q=80");
+}
+
+html[data-exp-skin="users"] {
+    --exp-bg-photo-dark: url("https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1920&q=80");
+    --exp-bg-photo-light: url("https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=1920&q=80");
+}
+
+/* ========== Global fon: html + foto (Savdo bilan bir xil uslub) ========== */
+html {
+    min-height: 100%;
+    background-color: #06080d;
+    background-image:
+        radial-gradient(ellipse 110% 85% at 50% -35%, rgba(0, 242, 255, 0.2), transparent 58%),
+        radial-gradient(ellipse 70% 55% at 105% 25%, rgba(139, 92, 246, 0.16), transparent 52%),
+        radial-gradient(ellipse 50% 40% at 80% 95%, rgba(0, 242, 255, 0.07), transparent 50%),
+        linear-gradient(168deg, rgba(4, 8, 18, 0.93) 0%, rgba(10, 8, 22, 0.9) 48%, rgba(4, 8, 16, 0.92) 100%),
+        var(--exp-bg-photo-dark);
+    background-size: auto, auto, auto, auto, cover;
+    background-position: center, center, center, center, center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+[data-theme="light"] html {
+    background-color: #eef2f7;
+    background-image:
+        radial-gradient(ellipse 100% 75% at 50% -30%, rgba(8, 145, 178, 0.16), transparent 58%),
+        radial-gradient(ellipse 65% 50% at 100% 10%, rgba(124, 58, 237, 0.1), transparent 52%),
+        radial-gradient(ellipse 45% 35% at 85% 90%, rgba(167, 139, 250, 0.12), transparent 50%),
+        linear-gradient(168deg, rgba(252, 253, 255, 0.94) 0%, rgba(241, 245, 249, 0.9) 52%, rgba(248, 250, 252, 0.95) 100%),
+        var(--exp-bg-photo-light);
+    background-size: auto, auto, auto, auto, cover;
+    background-position: center, center, center, center, center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
+/* Asosiy fon rangi body ustida emas — html dizayn ko‘rinadi */
+body {
+    background: transparent !important;
+    position: relative;
+}
+
+/* Nozik panjara + chiziqlar (o‘qilish uchun juda zaif) */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image:
+        linear-gradient(rgba(0, 242, 255, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 242, 255, 0.04) 1px, transparent 1px),
+        repeating-linear-gradient(
+            -12deg,
+            transparent,
+            transparent 96px,
+            rgba(139, 92, 246, 0.03) 96px,
+            rgba(139, 92, 246, 0.03) 97px
+        );
+    background-size:
+        56px 56px,
+        56px 56px,
+        auto;
+    mask-image: radial-gradient(ellipse 95% 85% at 50% 45%, black 15%, transparent 78%);
+    -webkit-mask-image: radial-gradient(ellipse 95% 85% at 50% 45%, black 15%, transparent 78%);
+}
+
+[data-theme="light"] body::before {
+    background-image:
+        linear-gradient(rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(15, 23, 42, 0.045) 1px, transparent 1px),
+        repeating-linear-gradient(
+            -12deg,
+            transparent,
+            transparent 96px,
+            rgba(124, 58, 237, 0.04) 96px,
+            rgba(124, 58, 237, 0.04) 97px
+        );
+    background-size:
+        52px 52px,
+        52px 52px,
+        auto;
+    mask-image: radial-gradient(ellipse 100% 90% at 50% 48%, black 18%, transparent 80%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 90% at 50% 48%, black 18%, transparent 80%);
+}
+
+/* Yengil animatsiyali nur doirasi */
+body::after {
+    content: "";
+    position: fixed;
+    width: min(140vw, 1200px);
+    height: min(140vw, 1200px);
+    left: 50%;
+    top: -40%;
+    transform: translateX(-50%);
+    z-index: -1;
+    pointer-events: none;
+    background: radial-gradient(
+        circle,
+        rgba(0, 242, 255, 0.12) 0%,
+        rgba(139, 92, 246, 0.06) 35%,
+        transparent 70%
+    );
+    animation: exp-bg-glow 14s ease-in-out infinite alternate;
+}
+
+[data-theme="light"] body::after {
+    background: radial-gradient(
+        circle,
+        rgba(8, 145, 178, 0.18) 0%,
+        rgba(124, 58, 237, 0.1) 38%,
+        transparent 68%
+    );
+    animation: exp-bg-glow-light 16s ease-in-out infinite alternate;
+}
+
+@keyframes exp-bg-glow {
+    0% {
+        opacity: 0.65;
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        opacity: 1;
+        transform: translateX(-48%) scale(1.06);
+    }
+    100% {
+        opacity: 0.75;
+        transform: translateX(-52%) scale(1.02);
+    }
+}
+
+@keyframes exp-bg-glow-light {
+    0% {
+        opacity: 0.55;
+        transform: translateX(-50%) scale(1);
+    }
+    50% {
+        opacity: 0.95;
+        transform: translateX(-51%) scale(1.05);
+    }
+    100% {
+        opacity: 0.65;
+        transform: translateX(-49%) scale(1.03);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    body::after {
+        animation: none;
+        opacity: 0.75;
+    }
+}
+
+aside.sidebar {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+[data-theme="light"] {
+    --primary: #0891b2;
+    --primary-dark: #0e7490;
+    --secondary: #7c3aed;
+    --secondary-dark: #6d28d9;
+    --accent: #e11d48;
+    --p: #0891b2;
+    --err: #dc2626;
+    --bg: #f1f5f9;
+    --bg-card: #ffffff;
+    --bg-sidebar: #f8fafc;
+    --bg-light: #e2e8f0;
+    --bg-dark: #f1f5f9;
+    --text: #0f172a;
+    --text-dim: #475569;
+    --text-muted: #64748b;
+    --border: rgba(15, 23, 42, 0.12);
+    --card: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.95);
+    --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+    --success: #059669;
+    --warning: #d97706;
+    --danger: #dc2626;
+    --gold: #b45309;
+    --silver: #64748b;
+    --bronze: #9a3412;
+}
+
+[data-theme="light"] body {
+    color: var(--text);
+}
+
+/* Qorong‘u rejim: shisha effekt, fon bilan uyg‘un */
+html:not([data-theme="light"]) .navbar {
+    background: rgba(6, 8, 14, 0.72) !important;
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    border-bottom-color: rgba(0, 242, 255, 0.12) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
+}
+
+html:not([data-theme="light"]) .sidebar,
+html:not([data-theme="light"]) aside.sidebar {
+    background: rgba(6, 8, 14, 0.78) !important;
+    backdrop-filter: blur(20px) saturate(1.15);
+    -webkit-backdrop-filter: blur(20px) saturate(1.15);
+    border-right-color: rgba(0, 242, 255, 0.1) !important;
+    box-shadow: 4px 0 32px rgba(0, 0, 0, 0.25);
+}
+
+html:not([data-theme="light"]) .stats-bar {
+    background: rgba(8, 10, 16, 0.65) !important;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Tizim elementlari — yorug‘: shisha + fon */
+[data-theme="light"] .sidebar,
+[data-theme="light"] aside.sidebar {
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    border-right-color: rgba(15, 23, 42, 0.1) !important;
+    box-shadow: 4px 0 28px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.82) !important;
+    backdrop-filter: blur(18px) saturate(1.15);
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    border-bottom-color: var(--border) !important;
+    box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+}
+
+[data-theme="light"] .stats-bar {
+    background: rgba(255, 255, 255, 0.72) !important;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+}
+
+[data-theme="light"] .login-box {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border-color: rgba(8, 145, 178, 0.35) !important;
+    box-shadow: 0 8px 40px rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .login-box input,
+[data-theme="light"] input:not([type="checkbox"]):not([type="radio"]) {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: var(--text) !important;
+}
+
+[data-theme="light"] .modal-content input,
+[data-theme="light"] .modal-content select {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: var(--text) !important;
+}
+
+[data-theme="light"] .modal {
+    background: rgba(241, 245, 249, 0.92) !important;
+}
+
+[data-theme="light"] .footer {
+    color: var(--text-muted) !important;
+}
+
+[data-theme="light"] .nav-link {
+    color: var(--text-dim) !important;
+}
+
+[data-theme="light"] .nav-link:hover,
+[data-theme="light"] .nav-link.active {
+    color: var(--primary) !important;
+    background: rgba(8, 145, 178, 0.08) !important;
+}
+
+[data-theme="light"] .logo {
+    color: var(--primary) !important;
+}
+
+/* Savdo bloklari: fon html-da — shaffof qoldiramiz (ikkilangan rasm bo‘lmasin) */
+html:not([data-theme="light"]) .market-main,
+html:not([data-theme="light"]) .savdo-page-bg {
+    background: transparent !important;
+}
+
+[data-theme="light"] .market-main,
+[data-theme="light"] .savdo-page-bg {
+    background: transparent !important;
+}
+
+/* SPA (dashboard / client): savdo fonini asosiy maydon chegarasiga cho‘zish */
+.main-content .savdo-page-bg {
+    margin: -2rem;
+    padding: 2rem;
+    border-radius: 16px;
+    min-height: calc(100vh - 5rem);
+    box-sizing: border-box;
+}
+
+.content .savdo-page-bg {
+    margin: -30px -40px;
+    padding: 30px 40px;
+    border-radius: 16px;
+    min-height: calc(100vh - 4rem);
+    box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+    .content .savdo-page-bg {
+        margin: -20px;
+        padding: 20px;
+    }
+}
+
+[data-theme="light"] .rank-content {
+    background: transparent !important;
+}
+
+[data-theme="light"] .balance-hero {
+    background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.95) 0%,
+        rgba(241, 245, 249, 0.85) 100%
+    ) !important;
+    border-color: rgba(8, 145, 178, 0.2) !important;
+    box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.6) inset;
+}
+
+/* Qorong‘u: kontent orqasida global gradient ko‘rinsin + nozik rangli ustki qatlam */
+html:not([data-theme="light"]) .main-content,
+html:not([data-theme="light"]) .content,
+html:not([data-theme="light"]) .main-tasks {
+    background: transparent !important;
+}
+
+html:not([data-theme="light"]) .rank-content {
+    background: transparent !important;
+}
+
+/* .market-main — fon html (data-exp-skin) orqali */
+
+html:not([data-theme="light"]) .login-box {
+    background: rgba(10, 12, 20, 0.72) !important;
+    backdrop-filter: blur(22px) saturate(1.2);
+    -webkit-backdrop-filter: blur(22px) saturate(1.2);
+    border-color: rgba(0, 242, 255, 0.28) !important;
+    box-shadow:
+        0 28px 64px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+        0 0 40px rgba(0, 242, 255, 0.06);
+}
+
+html:not([data-theme="light"]) .card {
+    background: rgba(14, 16, 26, 0.78) !important;
+    backdrop-filter: blur(18px) saturate(1.15);
+    -webkit-backdrop-filter: blur(18px) saturate(1.15);
+    border-color: rgba(0, 242, 255, 0.18) !important;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+
+html:not([data-theme="light"]) .modal,
+html:not([data-theme="light"]) .modal-overlay {
+    background: rgba(4, 6, 12, 0.88) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+html:not([data-theme="light"]) .modal-content {
+    background: rgba(16, 18, 28, 0.92) !important;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(0, 242, 255, 0.15) !important;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="light"] .product-card h3,
+[data-theme="light"] .p-name {
+    color: var(--text) !important;
+}
+
+[data-theme="light"] .table-wrapper,
+[data-theme="light"] .table-container,
+[data-theme="light"] .table-card {
+    border-color: rgba(15, 23, 42, 0.1) !important;
+    background: rgba(255, 255, 255, 0.78) !important;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    box-shadow: 0 8px 28px rgba(15, 23, 42, 0.07);
+}
+
+[data-theme="light"] .podium-card {
+    border-color: rgba(15, 23, 42, 0.1) !important;
+}
+
+[data-theme="light"] .custom-table th,
+[data-theme="light"] table th {
+    background: rgba(15, 23, 42, 0.04) !important;
+    color: var(--text-dim) !important;
+}
+
+[data-theme="light"] .custom-table td,
+[data-theme="light"] table td {
+    border-bottom-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+[data-theme="light"] .user-rank-bar {
+    box-shadow: 0 -8px 30px rgba(124, 58, 237, 0.15) !important;
+}
+
+[data-theme="light"] .card {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-color: rgba(8, 145, 178, 0.25) !important;
+    box-shadow: 0 8px 40px rgba(15, 23, 42, 0.06) !important;
+}
+
+[data-theme="light"] .task-header,
+[data-theme="light"] .content-card,
+[data-theme="light"] .modal-card {
+    background: var(--card) !important;
+    border-color: #cbd5e1 !important;
+    color: var(--text-dim) !important;
+}
+
+[data-theme="light"] .task-header h1,
+[data-theme="light"] .content-card h2 {
+    color: var(--text) !important;
+}
+
+[data-theme="light"] textarea {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: var(--text) !important;
+}
+
+/* Kartalar: chuqurlik va o‘qilish (ikkala mavzu) */
+html:not([data-theme="light"]) .feature-card,
+html:not([data-theme="light"]) .stat-card,
+html:not([data-theme="light"]) .product-card {
+    background: rgba(14, 16, 26, 0.72) !important;
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    border-color: rgba(0, 242, 255, 0.12) !important;
+    box-shadow:
+        0 14px 44px rgba(0, 0, 0, 0.38),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+[data-theme="light"] .feature-card,
+[data-theme="light"] .stat-card,
+[data-theme="light"] .product-card {
+    background: rgba(255, 255, 255, 0.86) !important;
+    backdrop-filter: blur(12px) saturate(1.1);
+    -webkit-backdrop-filter: blur(12px) saturate(1.1);
+    border-color: rgba(15, 23, 42, 0.1) !important;
+    box-shadow: 0 10px 36px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(255, 255, 255, 0.7) inset;
+}
+
+/* Mavzu tugmasi */
+.theme-toggle {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--primary);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    flex-shrink: 0;
+}
+
+.theme-toggle:hover {
+    background: rgba(8, 145, 178, 0.1);
+    border-color: var(--primary);
+}
+
+[data-theme="light"] .theme-toggle:hover {
+    background: rgba(8, 145, 178, 0.12);
+}
+
+.theme-icon-sun,
+.theme-icon-moon {
+    font-size: 1rem;
+    line-height: 1;
+    display: none;
+}
+
+html:not([data-theme="light"]) .theme-icon-sun {
+    display: inline-block;
+}
+
+[data-theme="light"] .theme-icon-moon {
+    display: inline-block;
+}
+
+.sidebar-bottom-stack {
+    margin-top: auto;
+    width: 100%;
+}
+
+.sidebar-theme-wrap {
+    padding: 0.75rem 1rem;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.nav-theme-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+aside.sidebar > nav {
+    flex: 1;
+    min-height: 0;
+}
+
+.sidebar-bottom-stack .session-box {
+    margin-top: 0;
+}
+
+.theme-toggle-float {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 1000;
+}

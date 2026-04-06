@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="market">
+<head>
+    <meta charset="UTF-8">
+    <title>Savdo Markazi | EXP Factory</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        :root { --primary: #00f2ff; --secondary: #7000ff; --bg: #050505; --card: rgba(15, 15, 15, 0.8); --gold: #ffcc00; }
+        body { background: var(--bg); color: white; font-family: 'Inter'; margin: 0; display: flex; min-height: 100vh; overflow-x: hidden; }
+        
+        /* Sidebar */
+        .sidebar { width: 280px; background: #080808; border-right: 1px solid #1a1a1a; position: fixed; height: 100vh; z-index: 100; }
+        .logo { padding: 40px 30px; font-family: 'Orbitron'; font-size: 1.5rem; color: var(--primary); letter-spacing: 2px; }
+        .nav-link { display: flex; align-items: center; padding: 18px 30px; color: #666; text-decoration: none; transition: 0.4s; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--primary); }
+        .nav-link i { margin-right: 15px; width: 20px; text-align: center; }
+
+        /* Fon: theme.css — mavzuga mos savdo rasmlari */
+        .market-main { margin-left: 280px; padding: 50px; width: calc(100% - 280px); min-height: 100vh; box-sizing: border-box; }
+        
+        /* Balance Hero */
+        .balance-hero {
+            background: linear-gradient(135deg, #000 0%, #0d0d0d 100%);
+            border: 1px solid #222; padding: 40px; border-radius: 25px;
+            margin-bottom: 50px; display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .shop-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 30px; }
+
+        .product-card {
+            background: var(--card); border: 1px solid #1a1a1a; border-radius: 25px;
+            padding: 30px; text-align: center; transition: 0.4s; position: relative; overflow: hidden;
+        }
+        .product-card:hover { transform: translateY(-10px); border-color: var(--primary); box-shadow: 0 15px 35px rgba(0, 242, 255, 0.1); }
+
+        .product-icon { font-size: 3rem; margin-bottom: 15px; color: var(--primary); text-shadow: 0 0 15px var(--primary); }
+        .product-card h3 { font-family: 'Orbitron'; font-size: 1rem; margin-bottom: 10px; color: #fff; }
+        .product-card p { color: #888; font-size: 0.8rem; margin-bottom: 20px; min-height: 45px; line-height: 1.5; }
+
+        .price-tag {
+            background: rgba(255, 204, 0, 0.1); padding: 8px 15px; border-radius: 12px;
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: 'Orbitron'; color: var(--gold); margin-bottom: 20px; border: 1px solid rgba(255, 204, 0, 0.2);
+        }
+
+        .btn-buy {
+            width: 100%; padding: 14px; border-radius: 12px; border: none;
+            background: linear-gradient(45deg, var(--secondary), var(--primary));
+            color: white; font-family: 'Orbitron'; font-weight: bold; cursor: pointer; transition: 0.3s;
+        }
+        .btn-buy:active { transform: scale(0.96); }
+
+        /* Cashout Section */
+        .cashout-card {
+            background: rgba(255, 204, 0, 0.03); border: 1px dashed var(--gold);
+            border-radius: 25px; padding: 40px; margin-top: 60px;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .cashout-input-group { display: flex; gap: 15px; background: #111; padding: 10px; border-radius: 15px; border: 1px solid #333; }
+        input[type="number"] { background: transparent; border: none; color: white; padding: 10px; outline: none; width: 150px; font-family: 'Orbitron'; }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EXP FACTORY</div>
+        <nav>
+            <a href="dashboard.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="tasks.html" class="nav-link"><i class="fas fa-code"></i> <span>Masalalar</span></a>
+            <a href="ranking.html" class="nav-link"><i class="fas fa-award"></i> <span>Leaderboard</span></a>
+            <a href="Marketplace.html" class="nav-link active"><i class="fas fa-hand-holding-usd"></i> <span>Savdo</span></a>
+            <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i> <span>Profil</span></a>
+        </nav>
+        <div class="sidebar-bottom-stack">
+            <div class="sidebar-theme-wrap">
+                <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="market-main">
+        <div class="balance-hero">
+            <div>
+                <h2 style="font-family: 'Orbitron'; margin: 0; letter-spacing: 2px;">EXP_MARKET</h2>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 0.65rem; color: var(--primary); letter-spacing: 3px; font-family: 'Orbitron'; margin-bottom: 5px;">CURRENT_COINS</div>
+                <div style="font-family: 'Orbitron'; color: var(--gold); font-size: 2.8rem; text-shadow: 0 0 20px rgba(255,204,0,0.3);">
+                    <span id="displayBalance">0</span> <i class="fas fa-coins" style="font-size: 1.5rem; vertical-align: middle;"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="shop-grid">
+            <div class="product-card">
+                <div class="product-icon"><i class="fab fa-react"></i></div>
+                <h3>React Mastery</h3>
+                <p>Noldan boshlab professional darajagacha React.js kursi.</p>
+                <div class="price-tag">50,000 <i class="fas fa-coins"></i></div>
+                <button class="btn-buy" onclick="handlePurchase('React Mastery', 50000)">SOTIB OLISH</button>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon"><i class="fab fa-node-js"></i></div>
+                <h3>Backend Expert</h3>
+                <p>Node.js va Express bilan kuchli backend tizimlar qurish.</p>
+                <div class="price-tag">65,000 <i class="fas fa-coins"></i></div>
+                <button class="btn-buy" onclick="handlePurchase('Backend Expert', 65000)">SOTIB OLISH</button>
+            </div>
+
+            <div class="product-card">
+                <div class="product-icon" style="color: #00ff88;"><i class="fas fa-bolt"></i></div>
+                <h3>2X XP Boost</h3>
+                <p>24 soat davomida barcha vazifalar uchun 2 barobar XP oling.</p>
+                <div class="price-tag">5,000 <i class="fas fa-coins"></i></div>
+                <button class="btn-buy" onclick="handlePurchase('XP Booster', 5000)">FAOLASHTIRISH</button>
+            </div>
+        </div>
+
+        <div class="cashout-card">
+            <div>
+                <h3 style="font-family: 'Orbitron'; margin: 0; color: var(--gold); font-size: 1.2rem;">PULGA ALMASHTIRISH</h3>
+            </div>
+            <div class="cashout-input-group">
+                <input type="number" id="cashoutAmount" placeholder="Miqdor">
+                <button class="btn-buy" style="width: auto; padding: 0 25px; background: var(--gold); color: black;" onclick="handleCashout()">YECHISH</button>
+            </div>
+        </div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        const SB_URL = "https://nltabynzbsdksskaehet.supabase.co";
+        const SB_KEY = "sb_publishable_X5gsvBhDXV_UHbUTguTsmg_ZfCixY5Xz5-vR-Z-2E";
+        
+        let user = JSON.parse(localStorage.getItem('currentUser'));
+
+        async function initMarket() {
+            if (!user) { window.location.href = 'login.html'; return; }
+            
+            // Real vaqtda balansni tekshirish
+            try {
+                const res = await fetch(`${SB_URL}/rest/v1/workers?id=eq.${user.id}&select=*`, {
+                    headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+                });
+                const data = await res.json();
+                if (data.length > 0) {
+                    user = data[0];
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    document.getElementById('displayBalance').innerText = (user.coins || 0).toLocaleString();
+                }
+            } catch (err) { console.error("Data error:", err); }
+        }
+
+        async function handlePurchase(name, price) {
+            if ((user.coins || 0) < price) {
+                alert("Tangalar yetarli emas! Masalalar yechib ko'proq tanga to'plang.");
+                return;
+            }
+
+            if (confirm(`${name} mahsulotini ${price.toLocaleString()} tangaga olasizmi?`)) {
+                const newBalance = user.coins - price;
+                if (await updateBalance(newBalance)) {
+                    await logTransaction(name, price, 'purchase');
+                    alert("Tabriklaymiz! Kurs yaqin orada profilingizda ochiladi.");
+                }
+            }
+        }
+
+        async function handleCashout() {
+            const amount = parseInt(document.getElementById('cashoutAmount').value);
+            if (!amount || amount < 1000) { alert("Minimal 1,000 tanga yechish mumkin!"); return; }
+            if (user.coins < amount) { alert("Balansda mablag' yetarli emas!"); return; }
+
+            if (confirm(`${amount.toLocaleString()} tangani yechib olishga ariza berasizmi?`)) {
+                const newBalance = user.coins - amount;
+                if (await updateBalance(newBalance)) {
+                    await logTransaction('Withdraw Request', amount, 'withdraw');
+                    document.getElementById('cashoutAmount').value = "";
+                    alert("Arizangiz qabul qilindi! Adminlar 24 soat ichida kartangizga pulni o'tkazishadi.");
+                }
+            }
+        }
+
+        async function updateBalance(newVal) {
+            try {
+                const res = await fetch(`${SB_URL}/rest/v1/workers?id=eq.${user.id}`, {
+                    method: "PATCH",
+                    headers: { 
+                        "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`,
+                        "Content-Type": "application/json", "Prefer": "return=representation"
+                    },
+                    body: JSON.stringify({ coins: newVal })
+                });
+                if (res.ok) {
+                    const updated = await res.json();
+                    user = updated[0];
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    document.getElementById('displayBalance').innerText = user.coins.toLocaleString();
+                    return true;
+                }
+            } catch (e) { alert("Bazaga ulanishda xato!"); }
+            return false;
+        }
+
+        async function logTransaction(item, cost, type) {
+            try {
+                await fetch(`${SB_URL}/rest/v1/transactions`, {
+                    method: "POST",
+                    headers: { 
+                        "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}`,
+                        "Content-Type": "application/json" 
+                    },
+                    body: JSON.stringify({
+                        worker_id: user.id,
+                        item_name: item,
+                        amount: cost,
+                        type: type,
+                        status: 'pending'
+                    })
+                });
+            } catch (e) { console.error("Log error"); }
+        }
+
+        window.onload = initMarket;
+    </script>
+</body>
+</html>

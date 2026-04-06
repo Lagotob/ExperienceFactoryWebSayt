@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="tasks">
+<head>
+    <meta charset="UTF-8">
+    <title>Vazifalar | EXP Factory Core</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #00f2ff; --secondary: #7000ff; --bg: #030303;
+            --card: #0d0d0d; --border: rgba(255, 255, 255, 0.08);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--bg); color: white; font-family: 'Inter'; display: flex; min-height: 100vh; }
+
+        /* Sidebar (Dashboard bilan bir xil) */
+        .sidebar { width: 280px; background: #080808; border-right: 1px solid #1a1a1a; position: fixed; height: 100vh; display: flex; flex-direction: column; }
+        .logo { padding: 40px 30px; font-family: 'Orbitron'; font-size: 1.5rem; color: var(--primary); letter-spacing: 2px; }
+        .nav-link { display: flex; align-items: center; padding: 18px 30px; color: #666; text-decoration: none; transition: 0.4s; font-family: 'Orbitron'; font-size: 0.8rem; }
+        .nav-link:hover, .nav-link.active { color: white; background: rgba(0, 242, 255, 0.05); border-left: 4px solid var(--primary); }
+        .nav-link i { margin-right: 15px; width: 20px; text-align: center;}
+
+        /* Main Content Area */
+        .main-tasks { margin-left: 280px; padding: 50px; width: calc(100% - 280px); }
+        .header-section { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+        .header-text h1 { font-family: 'Orbitron'; font-size: 2.5rem; letter-spacing: 4px; background: linear-gradient(to right, #fff, var(--primary)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        
+        /* Search & Filter */
+        .controls { display: flex; gap: 15px; margin-bottom: 30px; }
+        .search-box { flex-grow: 1; position: relative; }
+        .search-box i { position: absolute; left: 20px; top: 50%; transform: translateY(-50%); color: #444; }
+        .search-box input { width: 100%; background: var(--card); border: 1px solid #222; padding: 15px 50px; border-radius: 12px; color: white; outline: none; }
+        
+        .filter-btn { background: var(--card); border: 1px solid #222; color: #888; padding: 0 20px; border-radius: 12px; cursor: pointer; font-family: 'Orbitron'; font-size: 0.7rem; }
+        .filter-btn.active { border-color: var(--primary); color: var(--primary); }
+
+        /* Table */
+        .table-container { background: var(--card); border-radius: 20px; border: 1px solid #1a1a1a; overflow: hidden; }
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th { padding: 20px; background: #111; font-family: 'Orbitron'; font-size: 0.7rem; color: #555; letter-spacing: 1px; }
+        td { padding: 20px; border-bottom: 1px solid #151515; }
+        
+        /* Badges */
+        .diff { padding: 5px 12px; border-radius: 4px; font-size: 0.65rem; font-weight: bold; font-family: 'Orbitron'; }
+        .oson { color: #00ff88; background: rgba(0,255,136,0.1); }
+        .orta { color: #ffc107; background: rgba(255,193,7,0.1); }
+        .qiyin { color: #ff4444; background: rgba(255,68,68,0.1); }
+
+        .btn-view { background: transparent; border: 1px solid var(--primary); color: var(--primary); padding: 8px 15px; border-radius: 6px; text-decoration: none; font-size: 0.7rem; font-family: 'Orbitron'; transition: 0.3s; }
+        .btn-view:hover { background: var(--primary); color: black; }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo">EXP FACTORY</div>
+        <nav style="margin-top: 20px;">
+            <a href="client.html" class="nav-link"><i class="fas fa-th-large"></i> <span>Dashboard</span></a>
+            <a href="tasks.html" class="nav-link active"><i class="fas fa-code"></i> <span>Masalalar</span></a>
+            <a href="ranking.html" class="nav-link"><i class="fas fa-award"></i> <span>Leaderboard</span></a>
+            <a href="Marketplace.html" class="nav-link"><i class="fas fa-shopping-bag"></i> <span>Savdo (1=1)</span></a>
+            <a href="Profile.html" class="nav-link"><i class="fas fa-user-circle"></i> <span>Profil</span></a>
+        </nav>
+        <div class="sidebar-bottom-stack">
+            <div class="sidebar-theme-wrap">
+                <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-tasks">
+        <div class="header-section">
+            <div class="header-text">
+                <h1>VAZIFALAR ARXIVI</h1>
+                <p style="color: #666; margin-top: 10px;">Algoritmlar va real loyihalar markazi</p>
+            </div>
+            <div class="stats-mini" style="background: var(--card); padding: 15px 25px; border-radius: 12px; border: 1px solid #222; text-align: center;">
+                <div id="user-solved-count" style="font-family: 'Orbitron'; color: var(--primary); font-size: 1.5rem;">0</div>
+                <div style="font-size: 0.6rem; color: #666; letter-spacing: 1px;">SIZ YECHGANLAR</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="taskSearch" placeholder="Vazifa nomi yoki texnologiya...">
+            </div>
+            <button type="button" class="filter-btn active" data-filter="all" onclick="filterTasks('all', this)">BARCHASI</button>
+            <button type="button" class="filter-btn" data-filter="oson" onclick="filterTasks('oson', this)">OSON</button>
+            <button type="button" class="filter-btn" data-filter="orta" onclick="filterTasks('orta', this)">O'RTA</button>
+            <button type="button" class="filter-btn" data-filter="qiyin" onclick="filterTasks('qiyin', this)">QIYIN</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>MASALA NOMI</th>
+                        <th>QIYINCHILIK</th>
+                        <th>MUKOFOT</th>
+                        <th>AMAL</th>
+                    </tr>
+                </thead>
+                <tbody id="taskTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="theme.js"></script>
+    <script>
+        // 1. Supabase Sozlamalari
+const SB_URL = "https://SIZNING_LOYIHA_ID.supabase.co";
+const SB_KEY = "SIZNING_ANON_KEY";
+
+const tg = window.Telegram?.WebApp;
+let allTasks = [];
+
+async function fetchTasks() {
+    try {
+        const response = await fetch(`${SB_URL}/rest/v1/tasks?select=*`, {
+            headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+        });
+        allTasks = await response.json();
+        if (!Array.isArray(allTasks)) allTasks = [];
+
+        const tgUser = tg?.initDataUnsafe?.user || { id: 12345 };
+        const userRes = await fetch(`${SB_URL}/rest/v1/workers?tg_id=eq.${tgUser.id}`, {
+            headers: { "apikey": SB_KEY, "Authorization": `Bearer ${SB_KEY}` }
+        });
+        const userData = await userRes.json();
+
+        if (userData.length > 0) {
+            const el = document.getElementById('user-solved-count');
+            if (el) el.textContent = userData[0].tasks_completed || 0;
+        }
+
+        renderTasks('all');
+    } catch (error) {
+        console.error("Vazifalarni yuklashda xato:", error);
+    }
+}
+
+function renderTasks(filter = 'all', search = '') {
+    const tableBody = document.getElementById('taskTableBody');
+    if (!tableBody) return;
+
+    const q = (search || '').toLowerCase();
+    const filtered = allTasks.filter(task => {
+        const matchesSearch = (task.title || '').toLowerCase().includes(q) ||
+            (task.tech_stack || '').toLowerCase().includes(q);
+        const matchesFilter = filter === 'all' || task.difficulty === filter;
+        return matchesSearch && matchesFilter;
+    });
+
+    tableBody.innerHTML = filtered.map(task => `
+            <tr>
+                <td style="font-family: 'Orbitron'; color: #444;">#${task.id}</td>
+                <td>
+                    <div style="font-weight: 600;">${String(task.title || '').replace(/</g, '&lt;')}</div>
+                    <div style="font-size: 0.7rem; color: #555;">${String(task.tech_stack || 'Web Development').replace(/</g, '&lt;')}</div>
+                </td>
+                <td><span class="diff ${task.difficulty || ''}">${String(task.difficulty || '').toUpperCase()}</span></td>
+                <td style="font-family: 'Orbitron'; color: #ffcc00;">${task.reward_xp} <i class="fas fa-coins"></i></td>
+                <td><button type="button" onclick="openTask(${task.id})" class="btn-view">OCHISH</button></td>
+            </tr>
+        `).join('');
+}
+
+function openTask(taskId) {
+    try {
+        tg?.HapticFeedback?.impactOccurred?.('light');
+    } catch (e) { /* brauzerda Telegram yo'q */ }
+    window.location.href = `task-view.html?id=${taskId}`;
+}
+
+function filterTasks(type, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    if (btn) btn.classList.add('active');
+    const searchEl = document.getElementById('taskSearch');
+    renderTasks(type, searchEl ? searchEl.value : '');
+}
+
+document.getElementById('taskSearch').addEventListener('input', (e) => {
+    const activeBtn = document.querySelector('.filter-btn.active');
+    const filterType = activeBtn && activeBtn.dataset.filter ? activeBtn.dataset.filter : 'all';
+    renderTasks(filterType, e.target.value);
+});
+
+window.onload = fetchTasks;
+    </script>
+</body>
+</html>

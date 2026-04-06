@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="uz" data-exp-skin="landing">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>EXP Factory | Kelajak Zavodi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --primary: #00f2ff;
+            --secondary: #8b5cf6;
+            --accent: #f43f5e;
+            --bg: #0a0a0a;
+            --bg-card: #111111;
+            --text: #ffffff;
+            --text-dim: #94a3b8;
+            --border: rgba(255,255,255,0.08);
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gradient: linear-gradient(135deg, var(--primary), var(--secondary));
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .navbar {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 1rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(10,10,10,0.95);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+        }
+        .logo { font-family: 'Orbitron'; font-weight: 800; font-size: 1.5rem; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .nav-btn {
+            background: transparent;
+            border: 1px solid var(--primary);
+            color: var(--primary);
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            font-family: 'Orbitron';
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .nav-btn:hover { background: var(--primary); color: #000; box-shadow: 0 0 20px rgba(0,242,255,0.3); }
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 6rem 2rem;
+            position: relative;
+        }
+        .hero-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; overflow: hidden; z-index: -1; }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 50%, rgba(0,242,255,0.03) 0%, transparent 50%);
+            animation: rotate 30s linear infinite;
+        }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .hero-title { font-family: 'Orbitron'; font-size: clamp(2.5rem, 8vw, 5rem); font-weight: 900; background: var(--gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 1rem; }
+        .hero-subtitle { font-size: 1.2rem; color: var(--primary); margin-bottom: 2rem; min-height: 3rem; }
+        .btn-main { background: var(--gradient); border: none; padding: 1rem 2.5rem; border-radius: 10px; font-family: 'Orbitron'; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-main:hover { transform: scale(1.05); box-shadow: 0 0 30px rgba(0,242,255,0.4); }
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 4rem;
+            padding: 3rem 2rem;
+            background: rgba(0,0,0,0.5);
+            flex-wrap: wrap;
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+        .stat-item { text-align: center; }
+        .stat-number { font-family: 'Orbitron'; font-size: 2.5rem; font-weight: 700; color: var(--primary); display: block; }
+        .stat-label { color: var(--text-dim); font-size: 0.9rem; }
+        .features {
+            padding: 5rem 5%;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        .feature-card:hover { border-color: var(--primary); transform: translateY(-8px); }
+        .feature-icon { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; }
+        .feature-card h3 { font-family: 'Orbitron'; font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .feature-card p { color: var(--text-dim); font-size: 0.9rem; }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            backdrop-filter: blur(12px);
+        }
+        .modal-content {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 450px;
+            text-align: center;
+        }
+        .modal-content h2 { font-family: 'Orbitron'; color: var(--primary); margin-bottom: 1.5rem; }
+        .modal-content input, .modal-content select {
+            width: 100%;
+            padding: 0.9rem;
+            margin: 0.5rem 0;
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .modal-content input:focus, .modal-content select:focus { border-color: var(--primary); }
+        .modal-content button {
+            width: 100%;
+            padding: 0.9rem;
+            background: var(--gradient);
+            border: none;
+            border-radius: 12px;
+            font-family: 'Orbitron';
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 1rem;
+        }
+        .modal-link { color: var(--primary); text-decoration: none; font-size: 0.85rem; cursor: pointer; }
+        .footer { text-align: center; padding: 2rem; color: #64748b; font-size: 0.8rem; border-top: 1px solid var(--border); }
+        @media (max-width: 768px) {
+            .stats-bar { gap: 2rem; }
+            .stat-number { font-size: 1.8rem; }
+            .features { padding: 3rem 1.5rem; }
+        }
+    </style>
+    <script>try{var t=localStorage.getItem('exp_factory_theme');if(t==='light')document.documentElement.setAttribute('data-theme','light');}catch(e){}</script>
+    <link rel="stylesheet" href="theme.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">EXP_FACTORY</div>
+        <div id="nav-actions" class="nav-theme-inline">
+            <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+            <button class="nav-btn" onclick="showLoginModal()">KIRISH</button>
+        </div>
+    </nav>
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <h1 class="hero-title">EXP FACTORY</h1>
+        <p class="hero-subtitle" id="typewriter"></p>
+        <div id="hero-action">
+            <button class="btn-main" onclick="showRegisterModal()">LOYIHAGA QO'SHILISH</button>
+        </div>
+    </section>
+    <section class="stats-bar">
+        <div class="stat-item"><span class="stat-number" id="stat-users">0</span><span class="stat-label">Dasturchilar</span></div>
+        <div class="stat-item"><span class="stat-number" id="stat-tasks">0</span><span class="stat-label">Vazifalar</span></div>
+        <div class="stat-item"><span class="stat-number" id="stat-active">24/7</span><span class="stat-label">Faoliyat</span></div>
+    </section>
+    <section class="features">
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-brain"></i></div><h3>Aqlli Topshiriqlar</h3><p>Sizning darajangizga mos keladigan vazifalar</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-chart-line"></i></div><h3>Karyera Zavodi</h3><p>XP yig'ib, IT kompaniyalariga tavsiya etiling</p></div>
+        <div class="feature-card"><div class="feature-icon"><i class="fas fa-coins"></i></div><h3>Raqamli Valyuta</h3><p>EXP Coins ishlab toping va kurslarni sotib oling</p></div>
+    </section>
+    <footer class="footer"><p>© 2024 EXP Factory | Kelajak dasturchilari uchun platforma</p></footer>
+
+    <div id="login-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2><i class="fas fa-lock"></i> KIRISH</h2>
+            <input type="text" id="login-username" placeholder="Username">
+            <input type="password" id="login-password" placeholder="Parol">
+            <button onclick="loginUser()">KIRISH</button>
+            <p style="margin-top: 1rem;">Hisobingiz yo'qmi? <span class="modal-link" onclick="showRegisterModal()">Ro'yxatdan o'tish</span></p>
+        </div>
+    </div>
+
+    <div id="register-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h2><i class="fas fa-user-plus"></i> RO'YXATDAN O'TISH</h2>
+            <input type="text" id="reg-name" placeholder="To'liq ismingiz">
+            <input type="text" id="reg-username" placeholder="Username (login uchun)">
+            <input type="password" id="reg-password" placeholder="Parol">
+            <input type="text" id="reg-school" placeholder="O'qish joyingiz">
+            <select id="reg-region">
+                <option value="">Viloyatni tanlang</option>
+                <option value="Toshkent">Toshkent shahri</option>
+                <option value="Samarqand">Samarqand</option>
+                <option value="Buxoro">Buxoro</option>
+                <option value="Andijon">Andijon</option>
+                <option value="Farg'ona">Farg'ona</option>
+                <option value="Namangan">Namangan</option>
+                <option value="Navoiy">Navoiy</option>
+                <option value="Qashqadaryo">Qashqadaryo</option>
+                <option value="Surxondaryo">Surxondaryo</option>
+                <option value="Jizzax">Jizzax</option>
+                <option value="Sirdaryo">Sirdaryo</option>
+                <option value="Xorazm">Xorazm</option>
+                <option value="Qoraqalpog'iston">Qoraqalpog'iston</option>
+            </select>
+            <button onclick="registerUser()">RO'YXATDAN O'TISH</button>
+            <p style="margin-top: 1rem;">Hisobingiz bormi? <span class="modal-link" onclick="showLoginModal()">Kirish</span></p>
+        </div>
+    </div>
+
+    <script src="theme.js"></script>
+    <script>
+        // ============ DATA STORAGE ============
+        const USERS_KEY = 'exp_factory_users';
+        const TASKS_KEY = 'exp_factory_tasks';
+        const SUBMISSIONS_KEY = 'exp_factory_submissions';
+        
+        // Kechagi ma'lumotlarni saqlash uchun (agar mavjud bo'lsa)
+        let users = JSON.parse(localStorage.getItem(USERS_KEY)) || [];
+        let currentUser = JSON.parse(localStorage.getItem('exp_current_user'));
+        
+        // Default topshiriqlar (XP 100,200,300... qilib tuzatildi)
+        const DEFAULT_TASKS = [
+            { id: 1, title: "Algoritmlar Asosi", description: "C++ tilida 5 ta saralash algoritmini yozing", difficulty: "oson", reward_xp: 100, tech_stack: "C++" },
+            { id: 2, title: "Baza Bilan Ishlash", description: "PostgreSQL da murakkab JOIN so'rovlarini bajaring", difficulty: "orta", reward_xp: 200, tech_stack: "SQL" },
+            { id: 3, title: "Web Scraper", description: "Python yordamida ma'lumot yig'uvchi bot yarating", difficulty: "qiyin", reward_xp: 300, tech_stack: "Python" },
+            { id: 4, title: "React Komponentlar", description: "5 ta qayta ishlatiladigan React komponenti yozing", difficulty: "oson", reward_xp: 100, tech_stack: "React" },
+            { id: 5, title: "REST API", description: "Node.js va Express bilan to'liq API yarating", difficulty: "orta", reward_xp: 200, tech_stack: "Node.js" }
+        ];
+        
+        let tasks = JSON.parse(localStorage.getItem(TASKS_KEY)) || DEFAULT_TASKS;
+        let submissions = JSON.parse(localStorage.getItem(SUBMISSIONS_KEY)) || [];
+        
+        // Agar topshiriqlar bo'sh bo'lsa, default ni saqlash
+        if (!localStorage.getItem(TASKS_KEY)) {
+            localStorage.setItem(TASKS_KEY, JSON.stringify(DEFAULT_TASKS));
+        }
+        
+        // Statistikani yangilash
+        function updateStats() {
+            document.getElementById('stat-users').innerText = users.length.toLocaleString() + '+';
+            document.getElementById('stat-tasks').innerText = (tasks.length * 500).toLocaleString() + '+';
+        }
+        
+        function saveUsers() { localStorage.setItem(USERS_KEY, JSON.stringify(users)); }
+        function saveTasks() { localStorage.setItem(TASKS_KEY, JSON.stringify(tasks)); }
+        function saveSubmissions() { localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(submissions)); }
+        
+        // Ro'yxatdan o'tish
+        function registerUser() {
+            const full_name = document.getElementById('reg-name').value.trim();
+            const username = document.getElementById('reg-username').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const school = document.getElementById('reg-school').value.trim();
+            const region = document.getElementById('reg-region').value;
+            
+            if (!full_name || !username || !password || !school || !region) {
+                alert("❌ Barcha maydonlarni to'ldiring!");
+                return;
+            }
+            
+            // Bir username dan 2 marta foydalanishni bloklash
+            if (users.find(u => u.username === username)) {
+                alert("❌ Bu username allaqachon mavjud! Boshqa username tanlang.");
+                return;
+            }
+            
+            let role = 'user';
+            if (username === 'admin' || username === 'superadmin') {
+                role = 'admin';
+            }
+            
+            const newUser = {
+                id: Date.now(),
+                username: username,
+                full_name: full_name,
+                password: password,
+                region: region,
+                school: school,
+                bio: '',
+                avatar_data: '',
+                xp: 0,
+                coins: 0,
+                completed_tasks: 0,
+                role: role,
+                is_banned: false,
+                created_at: new Date().toISOString()
+            };
+            
+            users.push(newUser);
+            saveUsers();
+            currentUser = newUser;
+            localStorage.setItem('exp_current_user', JSON.stringify(currentUser));
+            document.getElementById('register-modal').style.display = 'none';
+            window.location.href = 'dashboard.html';
+        }
+        
+        // Kirish
+        function loginUser() {
+            const username = document.getElementById('login-username').value.trim();
+            const password = document.getElementById('login-password').value;
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (!user) {
+                alert("❌ Username yoki parol xato!");
+                return;
+            }
+            
+            // Ban qilingan foydalanuvchini tekshirish
+            if (user.is_banned) {
+                alert("⛔ Siz admin tomonidan bloklangansiz! Tizimga kira olmaysiz.");
+                return;
+            }
+            
+            currentUser = user;
+            localStorage.setItem('exp_current_user', JSON.stringify(currentUser));
+            document.getElementById('login-modal').style.display = 'none';
+            window.location.href = 'dashboard.html';
+        }
+        
+        function showLoginModal() {
+            document.getElementById('register-modal').style.display = 'none';
+            document.getElementById('login-modal').style.display = 'flex';
+        }
+        
+        function showRegisterModal() {
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('register-modal').style.display = 'flex';
+        }
+        
+        function checkAuth() {
+            if (currentUser) {
+                if (currentUser.is_banned) {
+                    localStorage.removeItem('exp_current_user');
+                    alert("⛔ Siz bloklangansiz!");
+                    window.location.reload();
+                    return;
+                }
+                document.getElementById('nav-actions').innerHTML = `
+                    <button type="button" class="theme-toggle" onclick="ExpTheme.toggle()" aria-label="Mavzu" title="Qorong'u / yorug'"><i class="fas fa-sun theme-icon-sun" aria-hidden="true"></i><i class="fas fa-moon theme-icon-moon" aria-hidden="true"></i></button>
+                    <button class="nav-btn" onclick="window.location.href='dashboard.html'" style="border-color: #10b981; color: #10b981;">DASHBOARD</button>
+                    <button class="nav-btn" onclick="logout()" style="border-color: #ef4444; color: #ef4444; margin-left: 10px;">CHIQISH</button>
+                `;
+                document.getElementById('hero-action').innerHTML = `<button class="btn-main" onclick="window.location.href='dashboard.html'">ISHNI DAVOM ETTIRISH</button>`;
+            }
+        }
+        
+        function logout() {
+            if (confirm("Tizimdan chiqmoqchimisiz?")) {
+                localStorage.removeItem('exp_current_user');
+                window.location.reload();
+            }
+        }
+        
+        function animateNumber(element, target) {
+            let current = 0;
+            const increment = target / 50;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    clearInterval(timer);
+                    element.textContent = target.toLocaleString() + '+';
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString() + '+';
+                }
+            }, 30);
+        }
+        
+        // Typewriter effekti
+        const phrases = ["Kod yozing, tajriba zavodida o'sing.", "Kelajak dasturchilari ekosistemasi.", "Mahoratingizni real loyihalarda sinang."];
+        let pIdx = 0, cIdx = 0, isDel = false;
+        const textElement = document.getElementById('typewriter');
+        
+        function type() {
+            if (!textElement) return;
+            const current = phrases[pIdx];
+            textElement.textContent = isDel ? current.substring(0, cIdx - 1) : current.substring(0, cIdx + 1);
+            cIdx = isDel ? cIdx - 1 : cIdx + 1;
+            let speed = isDel ? 50 : 100;
+            if (!isDel && cIdx === current.length) { isDel = true; speed = 2000; }
+            else if (isDel && cIdx === 0) { isDel = false; pIdx = (pIdx + 1) % phrases.length; speed = 500; }
+            setTimeout(type, speed);
+        }
+        
+        window.onload = () => {
+            checkAuth();
+            type();
+            updateStats();
+            animateNumber(document.getElementById('stat-users'), users.length || 1240);
+            animateNumber(document.getElementById('stat-tasks'), tasks.length * 500);
+        };
+    </script>
+</body>
+</html>
