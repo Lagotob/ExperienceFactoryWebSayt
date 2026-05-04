@@ -1,6 +1,6 @@
 async function updateRankings() {
     try {
-        const response = await fetch('https://exp-factory-web.onrender.com/leaderboard.html');
+        const response = await fetch('https://exp-factory-web.onrender.com/dashboard.html');
         const allUsers = await response.json();
         allUsers.sort((a, b) => b.score - a.score);
 
