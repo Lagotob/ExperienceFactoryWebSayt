@@ -10,8 +10,12 @@ app.use(express.json());
 app.use(express.static('public')); // HTML fayllar 'public' papkasida bo'lishi kerak
 
 // PostgreSQL Client
+// server.js ichida
 const client = new Client({
-  connectionString: process.env.DATABASE_URL, // Render Environment Variables-dan oladi
+  connectionString: "postgresql://neondb_owner:npg_EeRjF0XrQU1g@ep-sweet-fog-a1v0nvua-pooler.ap-southeast-1.aws.neon.tech/Server?sslmode=require",
+  ssl: {
+    rejectUnauthorized: false // Onlayn bazalar uchun shart
+  }
 });
 
 client.connect()
