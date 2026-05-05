@@ -1,18 +1,26 @@
 async function registerUser() {
+    // Input elementlari borligini tekshirish
+    const nameEl = document.getElementById("reg-name");
+    const userEl = document.getElementById("reg-username");
+    const passEl = document.getElementById("reg-password");
+    const schoolEl = document.getElementById("reg-school");
+    const regionEl = document.getElementById("reg-region");
+
+    if (!nameEl || !userEl || !passEl) {
+        console.error("Input elementlari topilmadi!");
+        return;
+    }
+
     const userData = {
-        name1: document.getElementById("reg-name").value,
-        username: document.getElementById("reg-username").value,
-        password: document.getElementById("reg-password").value,
-        school: document.getElementById("reg-school").value,
-        viloyat: document.getElementById("reg-region").value
+        name1: nameEl.value,
+        username: userEl.value,
+        password: passEl.value,
+        school: schoolEl.value,
+        viloyat: regionEl.value
     };
 
     try {
         const response = await fetch('/register', { 
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(userData)
-}), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -21,14 +29,27 @@ async function registerUser() {
         });
 
         const result = await response.json();
+
         if (response.ok) {
             alert("Ro'yxatdan o'tdingiz!");
+            // Inputlarni tozalash (ixtiyoriy)
+            nameEl.value = "";
+            userEl.value = "";
+            passEl.value = "";
         } else {
-            alert("Xatolik: " + result.error);
+            alert("Xatolik: " + (result.error || "Noma'lum xato"));
         }
     } catch (error) {
         console.error("Server bilan bog'lanishda xatolik:", error);
+        alert("Serverga ulanib bo'lmadi!");
     }
 }
 
-document.getElementById("btn").addEventListener("click", registerUser);
+// Tugma bosilishini kuzatish
+const registerBtn = document.getElementById("btn");
+if (registerBtn) {
+    registerBtn.addEventListener("click", (e) => {
+        e.preventDefault(); // Formani qayta yuklashni to'xtatish
+        registerUser();
+    });
+}
