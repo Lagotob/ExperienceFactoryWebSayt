@@ -7,10 +7,10 @@ app.use(express.json());
 app.use(cors());
 
 const client = new Client({
-  user: 'postgres',
+  user: 'neondb_owner',
   host: 'localhost',
   database: 'Server',
-  password: '0000',
+  password: 'npg_uiZCxeMolt96',
   port: 5432,
 });
 client.connect()
