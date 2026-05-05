@@ -9,8 +9,8 @@ app.use(cors());
 const client = new Client({
   user: 'neondb_owner', // Neon konsolidagi foydalanuvchi nomi
   host: 'ep-flat-cake-27097392.us-east-2.aws.neon.tech', // Neon'dagi Host manzili
-  database: 'neondb', // Bazangiz nomi
-  password: 'MAXFIY_PAROL', // Neon'dagi parolingiz
+  database: 'Server', // Bazangiz nomi
+  password: 'npg_L9SWxjrCthk3', // Neon'dagi parolingiz
   port: 5432,
   ssl: {
     rejectUnauthorized: false, // Onlayn bazalar uchun SSL shart
