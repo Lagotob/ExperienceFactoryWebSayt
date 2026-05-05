@@ -7,11 +7,14 @@ app.use(express.json());
 app.use(cors());
 
 const client = new Client({
-  user: 'postgres',
-  host: 'localhost',
-  database: 'Database',
-  password: '0000',
+  user: 'neondb_owner', // Neon konsolidagi foydalanuvchi nomi
+  host: 'ep-flat-cake-27097392.us-east-2.aws.neon.tech', // Neon'dagi Host manzili
+  database: 'neondb', // Bazangiz nomi
+  password: 'MAXFIY_PAROL', // Neon'dagi parolingiz
   port: 5432,
+  ssl: {
+    rejectUnauthorized: false, // Onlayn bazalar uchun SSL shart
+  },
 });
 client.connect()
   .then(() => console.log("PostgreSQL-ga muvaffaqiyatli ulandik!"))
