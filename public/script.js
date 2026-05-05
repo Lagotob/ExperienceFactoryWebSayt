@@ -20,7 +20,7 @@ async function registerUser() {
     };
 
     try {
-        const response = await fetch('/register', { 
+        const response = await fetch('/index.html', { 
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
