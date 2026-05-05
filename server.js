@@ -19,7 +19,7 @@ client.connect()
   .catch(err => console.error("Bazaga ulanishda xato:", err.message));
 
 // Register API
-app.post('/register', async (req, res) => {
+app.post('/', async (req, res) => {
   const { name1, username, password, school, viloyat } = req.body;
   
   console.log("Kelgan ma'lumot:", req.body); // Render loglarida ko'rinadi
