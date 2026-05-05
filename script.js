@@ -1,4 +1,4 @@
-async function reg() {
+async function registerUser() {
     const userData = {
         name1: document.getElementById("reg-name").value,
         username: document.getElementById("reg-username").value,
@@ -27,4 +27,4 @@ async function reg() {
     }
 }
 
-document.getElementById("btn").addEventListener("click", reg);
+document.getElementById("btn").addEventListener("click", registerUser);
