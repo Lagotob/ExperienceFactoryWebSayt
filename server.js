@@ -1,24 +1,22 @@
 const express = require('express');
 const { Client } = require('pg');
-const cors = require('cors'); // Brauzerdan so'rov kelishiga ruxsat berish uchun
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Neon Dashboard-dan "Connection String"ni nusxalab shu yerga qo'ying
+// Diqqat: database nomi 'Server' ekanligiga amin bo'ling, aks holda 'neondb' deb yozing
+const connectionString = "postgresql://neondb_owner:npg_L9SWxjrCthk3@ep-flat-cake-27097392.us-east-2.aws.neon.tech/Server?sslmode=require";
+
 const client = new Client({
-  user: 'neondb_owner', // Neon konsolidagi foydalanuvchi nomi
-  host: 'ep-flat-cake-27097392.us-east-2.aws.neon.tech', // Neon'dagi Host manzili
-  database: 'Server', // Bazangiz nomi
-  password: 'npg_L9SWxjrCthk3', // Neon'dagi parolingiz
-  port: 5432,
-  ssl: {
-    rejectUnauthorized: false, // Onlayn bazalar uchun SSL shart
-  },
+  connectionString: connectionString,
 });
+
 client.connect()
-  .then(() => console.log("PostgreSQL-ga muvaffaqiyatli ulandik!"))
-  .catch(err => console.error("Bazaga ulanishda xato:", err.stack));
+  .then(() => console.log("Neon PostgreSQL-ga muvaffaqiyatli ulandik!"))
+  .catch(err => console.error("Bazaga ulanishda xato:", err.message));
 
 app.post('/register', async (req, res) => {
   const { name1, username, password, school, viloyat } = req.body;
@@ -31,6 +29,7 @@ app.post('/register', async (req, res) => {
     
     res.status(200).json({ message: "Muvaffaqiyatli saqlandi!", user: result.rows[0] });
   } catch (err) {
+    console.error("Query xatosi:", err.message);
     res.status(500).json({ error: err.message });
   }
 });
