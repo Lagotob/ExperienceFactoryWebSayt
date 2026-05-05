@@ -6,9 +6,9 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-app.get('/', (req, res) => {
-  res.send('Server muvaffaqiyatli ishlamoqda! Ma\'lumotlar bazasiga ulanish bor.');
-});
+// app.get('/', (req, res) => {
+//   res.send('Server muvaffaqiyatli ishlamoqda! Ma\'lumotlar bazasiga ulanish bor.');
+// });
 
 // Neon Dashboard-dan "Connection String"ni nusxalab shu yerga qo'ying
 // Diqqat: database nomi 'Server' ekanligiga amin bo'ling, aks holda 'neondb' deb yozing
