@@ -1,10 +1,10 @@
 async function reg() {
     const userData = {
-        name1: document.getElementById("name").value,
-        username: document.getElementById("uname").value,
-        password: document.getElementById("pass").value,
-        school: document.getElementById("sch").value,
-        viloyat: document.getElementById("vilo").value
+        name1: document.getElementById("reg-name").value,
+        username: document.getElementById("reg-username").value,
+        password: document.getElementById("reg-password").value,
+        school: document.getElementById("reg-school").value,
+        viloyat: document.getElementById("reg-region").value
     };
 
     try {
